@@ -1,0 +1,6 @@
+@MockMentorRESTAPI_HostAddress = http://localhost:5273
+
+GET {{MockMentorRESTAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
