@@ -8,10 +8,11 @@ namespace MockMentorRESTAPI.Persistence.Repositories
     {
         public QuestionRepository(AppDbContext context) : base(context) { }
 
-        public async Task AddQuestionAsync(Question question)
+        public async Task<Question> AddQuestionAsync(Question question)
         {
             await _context.Questions.AddAsync(question);
             await _context.SaveChangesAsync();
+            return question;
         }
     }
 }

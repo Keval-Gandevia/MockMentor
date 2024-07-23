@@ -10,8 +10,11 @@ import {
   FormLabel,
   Textarea,
   Heading,
+  Spinner,
 } from "@chakra-ui/react";
 import { useAppContext } from "../context/AppContext";
+import ToastNotification from "../components/ToastNotification";
+import { useNavigate } from "react-router-dom";
 
 // schema to validate form
 const schema = z.object({
@@ -19,9 +22,10 @@ const schema = z.object({
 });
 
 const AddQuestion = () => {
+  const { isLoading, handleAddQuestionSubmit } = useAppContext();
+  const { showToast } = ToastNotification();
+  const navigate = useNavigate();
 
-
-  const {handleAddQuestionSubmit} = useAppContext();
   const {
     register,
     handleSubmit,
@@ -30,9 +34,15 @@ const AddQuestion = () => {
     resolver: zodResolver(schema),
   });
 
-  // const onSubmit = (data) => {
-  //   console.log(data);
-  // };
+  const onSubmit = async (data) => {
+    const response = await handleAddQuestionSubmit(data);
+    if (response.statusCode === 200) {
+      showToast({ message: response.message, status: "success" });
+      navigate(`/record-video`);
+    } else {
+      showToast({ message: response.message, status: "error" });
+    }
+  };
 
   return (
     <Box
@@ -49,7 +59,7 @@ const AddQuestion = () => {
       >
         Add Question
       </Heading>
-      <form onSubmit={handleSubmit(handleAddQuestionSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <FormControl isInvalid={errors.questionText}>
           <FormLabel htmlFor="questionText">Question</FormLabel>
           <Textarea
@@ -61,8 +71,14 @@ const AddQuestion = () => {
             {errors.questionText && errors.questionText.message}
           </FormErrorMessage>
         </FormControl>
-        <Button mt={4} colorScheme="blue" type="submit" w="full">
-          Add
+        <Button
+          mt={4}
+          colorScheme="blue"
+          type="submit"
+          w="full"
+          isLoading={isLoading}
+        >
+          {isLoading ? <Spinner size="sm" /> : "Add"}
         </Button>
       </form>
     </Box>

@@ -20,12 +20,12 @@ namespace MockMentorRESTAPI.Services
         {
             if (question == null)
             {
-                return new Response() { statusCode = HttpStatusCode.BadRequest, message = "Request body is null" };
+                return new Response() { statusCode = HttpStatusCode.BadRequest, message = "Error adding question" };
             }
 
-            await _questionRepository.AddQuestionAsync(question);
+            var res = await _questionRepository.AddQuestionAsync(question);
 
-            return new Response() { statusCode = HttpStatusCode.OK, message = "Question added successfully" };
+            return new Response() { statusCode = HttpStatusCode.OK, message = "Question added successfully", payload = res};
         }
     }
 }

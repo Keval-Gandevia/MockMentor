@@ -4,6 +4,6 @@ namespace MockMentorRESTAPI.Domain.Repositories
 {
     public interface IQuestionRepository
     {
-        Task AddQuestionAsync(Question question);
+        Task<Question> AddQuestionAsync(Question question);
     }
 }
