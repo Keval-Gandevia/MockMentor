@@ -1,8 +1,5 @@
-// src/pages/LandingPage.jsx
-import React from 'react';
-import { Box, Button, Container, Heading, Text, VStack, Stack, Card, CardBody, CardHeader, CardFooter, Image, Badge, Icon, SimpleGrid } from '@chakra-ui/react';
-import { AtSignIcon, QuestionIcon, ViewIcon, InfoOutlineIcon, ArrowForwardIcon, CheckCircleIcon } from '@chakra-ui/icons';
-// import { Link as RouterLink } from 'react-router-dom';
+import { Container, Heading, Text, VStack, Stack, Card, CardBody, CardHeader, Badge, Icon, SimpleGrid } from '@chakra-ui/react';
+import { QuestionIcon, ViewIcon, InfoOutlineIcon, ArrowForwardIcon, CheckCircleIcon } from '@chakra-ui/icons';
 
 const features = [
   {
