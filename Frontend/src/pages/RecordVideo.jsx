@@ -9,7 +9,7 @@ const RecordVideo = () => {
   const videoRef = useRef(null);
   const recordedChunks = useRef([]);
 
-  const {questionText} = useAppContext();
+  const {questionText, handleVideoSubmit} = useAppContext();
 
   const handlePermissions = async () => {
     try {
@@ -47,14 +47,16 @@ const RecordVideo = () => {
     setIsRecording(false);
   };
 
-  const downloadVideo = () => {
-    const link = document.createElement("a");
-    link.href = videoUrl;
-    link.download = "recorded_video.webm";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+
+
+  // const downloadVideo = () => {
+  //   const link = document.createElement("a");
+  //   link.href = videoUrl;
+  //   link.download = "recorded_video.webm";
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  // };
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4} height="100vh">
@@ -72,7 +74,7 @@ const RecordVideo = () => {
         <Button colorScheme="red" onClick={stopRecording} isDisabled={!isRecording}>
           Stop
         </Button>
-        <Button colorScheme="purple" onClick={downloadVideo} isDisabled={!videoUrl}>
+        <Button colorScheme="purple" onClick={() => handleVideoSubmit(videoUrl)} isDisabled={!videoUrl}>
           Submit
         </Button>
       </HStack>
