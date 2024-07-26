@@ -20,7 +20,7 @@ const Navbar = () => {
 
   return (
     <Box bg="gray.100" px={4}>
-      <Flex h={16} alignItems="center" justifyContent="space-between">
+      <Flex h={14} alignItems="center" justifyContent="space-between">
         <Box>
           <Heading size="md" as={Link} to="/" lineHeight="inherit">
             MockMentor
