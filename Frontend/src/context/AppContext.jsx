@@ -1,7 +1,7 @@
 import axios from "axios";
 import { createContext, useContext, useReducer } from "react";
 import reducer from "./reducer";
-import { ADD_QUESTION, SET_LOADING } from "./actions";
+import { ADD_QUESTION, ADD_VIDEO, SET_LOADING } from "./actions";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -21,6 +21,7 @@ const api = axios.create({
 
 const URL = {
   addQuestionURL: `/Questions/addQuestion`,
+  addVideoURL: `/Videos/addVideo`,
 };
 
 const initialState = {
@@ -35,10 +36,11 @@ const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleAddQuestionSubmit = async (data) => {
-    dispatch({ type: SET_LOADING });
+    // dispatch({ type: SET_LOADING });
     try {
       const res = await api.post(URL.addQuestionURL, data);
-      if (res.data.statusCode === 200) {
+      console.log(res.data)
+      if (res.data.statusCode === 201) {
         dispatch({ type: ADD_QUESTION, data: res.data.payload });
       }
       return res.data;
@@ -74,11 +76,29 @@ const AppProvider = ({ children }) => {
       const blob = await fetch(videoUrl).then((res) => res.blob());
       const videoS3Url = await uploadVideoToS3(blob);
       console.log(videoS3Url);
-      console.log("Video submitted successfully!");
+      return await addVideo(videoS3Url);
     } catch (error) {
       alert("Error submitting video");
     }
   };
+
+  const addVideo = async (videoUrl) => {
+    const video = {
+      questionId: state.questionId,
+      videoUrl: videoUrl
+    }
+    try {
+      const res = await api.post(URL.addVideoURL, video);
+      // console.log(res.data);
+      // // if (res.data.statusCode === 201) {
+      // //   dispatch({ type: ADD_VIDEO, data: res.data.payload });
+      // // }
+      return res.data;
+    } catch (error) {
+      console.error("Error while adding video!", error);
+      return { statusCode: 500, message: "Error while adding video" };
+    }
+  }
 
   return (
     <AppContext.Provider

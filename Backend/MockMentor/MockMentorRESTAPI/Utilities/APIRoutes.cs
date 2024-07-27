@@ -5,5 +5,6 @@
         public const string CONTROLLER = "api/[controller]";
 
         public const string ADD_QUESTION = "addQuestion";
+        public const string ADD_VIDEO = "addVideo";
     }
 }

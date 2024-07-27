@@ -3,15 +3,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MockMentorRESTAPI.Domain.Models
 {
-    public class Question
+    public class Video
     {
         [Key]
         [Required]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int questionId { get; set; }
+        public int videoId {  get; set; }
         [Required]
-        public string? questionText { get; set; }
+        public string videoUrl { get; set; }
 
-        public virtual Video? video { get; set; }
+        [ForeignKey("Question")]
+        public int questionId { get; set; }
+        public virtual Question Question { get; set; }
+
+
     }
 }

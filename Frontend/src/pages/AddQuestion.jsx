@@ -36,7 +36,7 @@ const AddQuestion = () => {
 
   const onSubmit = async (data) => {
     const response = await handleAddQuestionSubmit(data);
-    if (response.statusCode === 200) {
+    if (response.statusCode === 201) {
       showToast({ message: response.message, status: "success" });
       navigate(`/record-video`);
     } else {

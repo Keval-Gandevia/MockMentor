@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Box, Button, Text, VStack, HStack } from "@chakra-ui/react";
 import { useAppContext } from "../context/AppContext";
+import ToastNotification from "../components/ToastNotification";
 
 const RecordVideo = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -8,6 +9,7 @@ const RecordVideo = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const videoRef = useRef(null);
   const recordedChunks = useRef([]);
+  const { showToast } = ToastNotification();
 
   const {questionText, handleVideoSubmit} = useAppContext();
 
@@ -47,6 +49,15 @@ const RecordVideo = () => {
     setIsRecording(false);
   };
 
+  const onSubmit = async (videoUrl) => {
+    const response = await handleVideoSubmit(videoUrl);
+    if (response.statusCode === 201) {
+      showToast({ message: response.message, status: "success" });
+      // navigate(`/record-video`);
+    } else {
+      showToast({ message: response.message, status: "error" });
+    }
+  }
 
 
   // const downloadVideo = () => {
@@ -74,7 +85,7 @@ const RecordVideo = () => {
         <Button colorScheme="red" onClick={stopRecording} isDisabled={!isRecording}>
           Stop
         </Button>
-        <Button colorScheme="purple" onClick={() => handleVideoSubmit(videoUrl)} isDisabled={!videoUrl}>
+        <Button colorScheme="purple" onClick={() => onSubmit(videoUrl)} isDisabled={!videoUrl}>
           Submit
         </Button>
       </HStack>

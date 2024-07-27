@@ -16,9 +16,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Register services
 builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IVideoService, VideoService>();
 
 // Register repositories
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 
 // Enable cors
 builder.Services.AddCors(options =>

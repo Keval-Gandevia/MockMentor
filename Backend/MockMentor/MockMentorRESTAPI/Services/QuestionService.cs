@@ -25,7 +25,7 @@ namespace MockMentorRESTAPI.Services
 
             var res = await _questionRepository.AddQuestionAsync(question);
 
-            return new Response() { statusCode = HttpStatusCode.OK, message = "Question added successfully", payload = res};
+            return new Response() { statusCode = HttpStatusCode.Created, message = "Question added successfully", payload = res};
         }
     }
 }
