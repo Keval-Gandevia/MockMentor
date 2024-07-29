@@ -10,7 +10,7 @@ namespace MockMentorRESTAPI.Domain.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int videoId {  get; set; }
         [Required]
-        public string videoUrl { get; set; }
+        public string? videoUrl { get; set; }
 
         [ForeignKey("Question")]
         public int questionId { get; set; }

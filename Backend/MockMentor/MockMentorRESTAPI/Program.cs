@@ -1,3 +1,5 @@
+using Amazon.Runtime;
+using Amazon.SQS;
 using Microsoft.EntityFrameworkCore;
 using MockMentorRESTAPI.Domain.Repositories;
 using MockMentorRESTAPI.Domain.Services;
@@ -15,8 +17,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 // Register services
+builder.Services.AddAWSService<IAmazonSQS>();
+
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
+builder.Services.AddScoped<ISQSService, SQSService>();
 
 // Register repositories
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
