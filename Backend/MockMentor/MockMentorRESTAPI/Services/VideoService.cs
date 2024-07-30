@@ -4,6 +4,7 @@ using MockMentorRESTAPI.Domain.Repositories;
 using MockMentorRESTAPI.Domain.Services;
 using MockMentorRESTAPI.Utilities;
 using System.Net;
+using System.Text.Json;
 
 namespace MockMentorRESTAPI.Services
 {
@@ -11,7 +12,7 @@ namespace MockMentorRESTAPI.Services
     {
         private readonly IVideoRepository _videoRepository;
         private readonly ISQSService _sqsservice;
-        private readonly string _queueUrl = "https://sqs.us-east-1.amazonaws.com/103677046658/answer-request-queue";
+        private readonly string QUEUE_NAME = "answer-request-queue";
 
         public VideoService(IVideoRepository videoRepository, ISQSService sqsService)
         {
@@ -29,7 +30,11 @@ namespace MockMentorRESTAPI.Services
 
             var res = await _videoRepository.AddVideosAsync(video);
 
-            await _sqsservice.SendMessage(_queueUrl, "Hello! first message to queue");
+            string videoJson = JsonSerializer.Serialize(video);
+
+            string queueUrl = await _sqsservice.GetQueueUrlAsync(QUEUE_NAME);
+
+            await _sqsservice.SendMessage(queueUrl, videoJson);
 
             return new Response() { statusCode = HttpStatusCode.Created, message = "Video added successfully.", payload = res };
 

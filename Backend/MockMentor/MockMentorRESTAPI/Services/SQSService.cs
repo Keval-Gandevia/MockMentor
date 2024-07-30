@@ -23,5 +23,16 @@ namespace MockMentorRESTAPI.Services
             await _sqsClient.SendMessageAsync(sendMessageRequest);
             return true;
         }
+
+        public async Task<string> GetQueueUrlAsync(string queueName)
+        {
+            var request = new GetQueueUrlRequest
+            {
+                QueueName = queueName
+            };
+
+            var response = await _sqsClient.GetQueueUrlAsync(request);
+            return response.QueueUrl;
+        }
     }
 }
