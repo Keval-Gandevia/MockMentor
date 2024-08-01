@@ -1,92 +1,169 @@
-import os
 import boto3
+import cv2
+import os
+import urllib.parse
 import json
-import ffmpeg
-import uuid
-import time
+from collections import defaultdict
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 
-# AWS credentials and region configuration
 region_name = os.getenv('AWS_DEFAULT_REGION')
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 aws_session_token = os.getenv('AWS_SESSION_TOKEN')
 
-s3 = boto3.client('s3', region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token)
-rekognition = boto3.client('rekognition', region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token)
+rekognition = boto3.client(
+    'rekognition',
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+    aws_session_token=aws_session_token,
+    region_name=region_name
+)
 
-def convert_webm_to_mp4(input_url, output_path):
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+    aws_session_token=aws_session_token,
+    region_name=region_name
+)
+
+sqs = boto3.client(
+    'sqs',
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+    aws_session_token=aws_session_token,
+    region_name=region_name
+)
+
+def download_video_from_s3(video_url, download_path):
+    print(f"Downloading video from S3: {video_url}")
     try:
-        ffmpeg.input(input_url).output(output_path).run(overwrite_output=True)
-    except ffmpeg.Error as e:
-        print(f"Error converting video: {e}")
-        raise
+        parsed_url = urllib.parse.urlparse(video_url)
+        bucket_name = parsed_url.netloc.split('.')[0]
+        video_key = parsed_url.path.lstrip('/')
+        s3.download_file(bucket_name, video_key, download_path)
+        print(f"Video downloaded successfully to {download_path}")
+    except NoCredentialsError:
+        print("Credentials not available")
+    except PartialCredentialsError:
+        print("Incomplete credentials provided")
+    except ClientError as e:
+        print(f"ClientError: {e}")
+    except Exception as e:
+        print(f"Error downloading video: {str(e)}")
 
-def detect_emotion_from_video(bucket_name, video_url):
-    # Convert WebM to MP4
-    object_name = video_url.split('/')[-1]
-    mp4_object_name = f"{uuid.uuid4()}.mp4"
-    mp4_path = f"/tmp/{mp4_object_name}"
+def get_frames(video_path):
+    print(f"Getting frames from video: {video_path}")
+    video_capture = cv2.VideoCapture(video_path)
+    frames = []
+    success, frame = video_capture.read()
+    while success:
+        frames.append(frame)
+        success, frame = video_capture.read()
+    video_capture.release()
+    print(f"Extracted {len(frames)} frames from video")
+    return frames
 
-    # Download the video from S3
-    s3.download_file(bucket_name, object_name, f"/tmp/{object_name}")
+def detect_emotions_in_frame(frame):
+    print("Detecting emotions in frame")
+    _, encoded_image = cv2.imencode('.jpg', frame)
+    response = rekognition.detect_faces(
+        Image={'Bytes': encoded_image.tobytes()},
+        Attributes=['ALL']
+    )
+    emotions = []
+    if 'FaceDetails' in response:
+        for face_detail in response['FaceDetails']:
+            emotions.extend(face_detail['Emotions'])
+    print(f"Detected {len(emotions)} emotions in frame")
+    return emotions
 
-    # Convert the downloaded video to MP4
-    convert_webm_to_mp4(f"/tmp/{object_name}", mp4_path)
+def analyze_video_emotions(video_url):
+    print(f"Analyzing emotions in video: {video_url}")
+    download_path = 'video.mp4'
+    download_video_from_s3(video_url, download_path)
+    
+    frames = get_frames(download_path)
+    all_emotions = []
+    
+    for frame in frames:
+        emotions = detect_emotions_in_frame(frame)
+        all_emotions.extend(emotions)
 
-    # Upload the converted video back to S3
-    s3.upload_file(mp4_path, bucket_name, mp4_object_name)
+    if os.path.exists(download_path):
+        os.remove(download_path)
+        print(f"Removed temporary video file: {download_path}")
+    
+    return all_emotions
 
-    # Start face detection in the video using AWS Rekognition
-    response = rekognition.start_face_detection(
-        Video={'S3Object': {'Bucket': bucket_name, 'Name': mp4_object_name}}
+def find_average_emotion(emotions):
+    print("Finding average emotion")
+    emotion_confidences = defaultdict(list)
+    for emotion in emotions:
+        emotion_confidences[emotion['Type']].append(emotion['Confidence'])
+    
+    average_confidence = {emotion: sum(confidences) / len(confidences) 
+                          for emotion, confidences in emotion_confidences.items()}
+    
+    average_emotion = max(average_confidence, key=average_confidence.get)
+    print(f"Average emotion: {average_emotion}")
+    return average_emotion
+
+def create_queue_if_not_exists(queue_name):
+    response = sqs.list_queues(QueueNamePrefix=queue_name)
+    if 'QueueUrls' in response:
+        for url in response['QueueUrls']:
+            if queue_name in url:
+                return url
+    
+    response = sqs.create_queue(QueueName=queue_name)
+    return response['QueueUrl']
+
+def send_response(response_queue_url, message):
+    print(f"Sending response to queue URL: {response_queue_url}")
+    sqs.send_message(
+        QueueUrl=response_queue_url,
+        MessageBody=json.dumps(message)
     )
 
-    job_id = response['JobId']
-    
-    # Wait for the job to complete
-    start_time = time.time()
-    while True:
-        response = rekognition.get_face_detection(JobId=job_id)
-        if response['JobStatus'] in ['SUCCEEDED', 'FAILED']:
-            break
-        if time.time() - start_time > 600:  # Timeout after 10 minutes
-            raise TimeoutError('Face detection job timed out')
-        time.sleep(5)
-    
-    if response['JobStatus'] == 'FAILED':
-        print("Job failed with response:", response)
-        raise Exception('Face detection job failed')
-    
-    if not response['Faces']:
-        raise Exception('No faces detected in the video')
-    
-    # Extract dominant emotion from detected faces
-    emotions = response['Faces'][0]['Emotions']
-    dominant_emotion = max(emotions, key=lambda e: e['Confidence'])['Type']
-    
-    return dominant_emotion
-
-def process_emotion_message():
-    # Hardcoded response body for testing
-    body = {
-        'videoUrl': 'https://mock-mentor-bucket.s3.amazonaws.com/20_video.webm',
-        'videoId': 20,
-        'questionId': '20'
-    }
-    
+def process_message(message, response_queue_url):
+    body = json.loads(message['Body'])
+    question_id = body.get('questionId')
     video_url = body.get('videoUrl')
-    video_id = body.get('videoId')
-    bucket_name = 'mock-mentor-bucket'
 
-    dominant_emotion = detect_emotion_from_video(bucket_name, video_url)
+    video_id = video_url.split('/')[-1].split('_')[0]
 
-    # Print the response
+    emotions = analyze_video_emotions(video_url)
+    average_emotion = find_average_emotion(emotions)
+
     response = {
+        'questionId': question_id,
         'videoId': video_id,
-        'emotion': dominant_emotion
+        'emotionValue': average_emotion
     }
-    
-    print(json.dumps(response, indent=4))
+    send_response(response_queue_url, response)
 
-if __name__ == '__main__':
-    process_emotion_message()
+def listen_for_messages(request_queue_name, response_queue_name):
+    request_queue_url = create_queue_if_not_exists(request_queue_name)
+    response_queue_url = create_queue_if_not_exists(response_queue_name)
+    
+    while True:
+        response = sqs.receive_message(
+            QueueUrl=request_queue_url,
+            AttributeNames=['All'],
+            MaxNumberOfMessages=1,
+            WaitTimeSeconds=20
+        )
+
+        if 'Messages' in response:
+            for message in response['Messages']:
+                process_message(message, response_queue_url)
+                sqs.delete_message(
+                    QueueUrl=request_queue_url,
+                    ReceiptHandle=message['ReceiptHandle']
+                )
+
+if __name__ == "__main__":
+    request_queue_name = 'emotion-request-queue'
+    response_queue_name = 'emotion-response-queue'
+    listen_for_messages(request_queue_name, response_queue_name)

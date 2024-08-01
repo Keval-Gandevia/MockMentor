@@ -12,6 +12,7 @@ s3 = boto3.client('s3', region_name=region_name, aws_access_key_id=aws_access_ke
 sqs = boto3.client('sqs', region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token)
 
 def convert_video_format(bucket_name, video_url, question_id):
+    print(f"Starting video conversion for {video_url} with question ID {question_id}")
     object_name = video_url.split('/')[-1]
     video_file_name = object_name
     converted_video_file_name = f"{question_id}_video.mp4"
@@ -23,9 +24,10 @@ def convert_video_format(bucket_name, video_url, question_id):
         '-strict', 'experimental', converted_video_file_name
     ]
     subprocess.run(command, check=True)
-    
+    print(f"Uploading converted video to S3 bucket {bucket_name}")
     s3.upload_file(converted_video_file_name, bucket_name, converted_video_file_name)
 
+    print(f"Removing local files: {video_file_name}, {converted_video_file_name}")
     os.remove(video_file_name)
     os.remove(converted_video_file_name)
     
@@ -58,6 +60,7 @@ def create_queue_if_not_exists(queue_name):
     return response['QueueUrl']
 
 def send_response(response_queue_url, message):
+    print(f"Sending response message to queue: {response_queue_url}")
     sqs.send_message(
         QueueUrl=response_queue_url,
         MessageBody=json.dumps(message)

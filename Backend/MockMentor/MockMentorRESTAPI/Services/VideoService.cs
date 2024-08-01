@@ -35,6 +35,8 @@ namespace MockMentorRESTAPI.Services
 
             string videoJson = JsonSerializer.Serialize(video);
 
+            Debug.WriteLine(videoJson);
+
             string answerRequestQueueUrl = await _sqsservice.GetQueueUrlAsync(_configuration["AWS:SQS:AnswerRequestQueue"]);
             string videoConversionRequestQueueUrl = await _sqsservice.GetQueueUrlAsync(_configuration["AWS:SQS:VideoConversionRequestQueue"]);
 
