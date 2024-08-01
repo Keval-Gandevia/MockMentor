@@ -1,4 +1,5 @@
 using Amazon.Runtime;
+using Amazon.S3;
 using Amazon.SQS;
 using Microsoft.EntityFrameworkCore;
 using MockMentorRESTAPI.Domain.Repositories;

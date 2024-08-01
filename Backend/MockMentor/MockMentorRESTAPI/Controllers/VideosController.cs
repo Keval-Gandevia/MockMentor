@@ -4,6 +4,7 @@ using MockMentorRESTAPI.Domain.DTOs;
 using MockMentorRESTAPI.Domain.Models;
 using MockMentorRESTAPI.Domain.Services;
 using MockMentorRESTAPI.Utilities;
+using System.Diagnostics;
 
 namespace MockMentorRESTAPI.Controllers
 {
