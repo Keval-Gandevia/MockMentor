@@ -36,7 +36,7 @@ const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleAddQuestionSubmit = async (data) => {
-    // dispatch({ type: SET_LOADING });
+    dispatch({ type: SET_LOADING, payload: true });
     try {
       const res = await api.post(URL.addQuestionURL, data);
       console.log(res.data)
@@ -47,6 +47,9 @@ const AppProvider = ({ children }) => {
     } catch (error) {
       console.error("Error while adding question!", error);
       return { statusCode: 500, message: "Error while adding question" };
+    }
+    finally {
+      dispatch({type: SET_LOADING, payload: false})
     }
   };
 
@@ -83,20 +86,20 @@ const AppProvider = ({ children }) => {
   };
 
   const addVideo = async (videoUrl) => {
+    dispatch({ type: SET_LOADING, payload: true });
     const video = {
       questionId: state.questionId,
       videoUrl: videoUrl
     }
     try {
       const res = await api.post(URL.addVideoURL, video);
-      // console.log(res.data);
-      // // if (res.data.statusCode === 201) {
-      // //   dispatch({ type: ADD_VIDEO, data: res.data.payload });
-      // // }
       return res.data;
     } catch (error) {
       console.error("Error while adding video!", error);
       return { statusCode: 500, message: "Error while adding video" };
+    }
+    finally {
+      dispatch({type: SET_LOADING, payload: false})
     }
   }
 

@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
-import { Box, Button, Text, VStack, HStack } from "@chakra-ui/react";
+import { Box, Button, Text, VStack, HStack, Spinner } from "@chakra-ui/react";
 import { useAppContext } from "../context/AppContext";
 import ToastNotification from "../components/ToastNotification";
+import { useNavigate } from "react-router-dom";
 
 const RecordVideo = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -10,8 +11,9 @@ const RecordVideo = () => {
   const videoRef = useRef(null);
   const recordedChunks = useRef([]);
   const { showToast } = ToastNotification();
+  const navigate = useNavigate();
 
-  const {questionText, handleVideoSubmit} = useAppContext();
+  const { questionText, handleVideoSubmit, isLoading } = useAppContext();
 
   const handlePermissions = async () => {
     try {
@@ -53,42 +55,69 @@ const RecordVideo = () => {
     const response = await handleVideoSubmit(videoUrl);
     if (response.statusCode === 201) {
       showToast({ message: response.message, status: "success" });
-      // navigate(`/record-video`);
+      navigate("/view-feedback");
     } else {
       showToast({ message: response.message, status: "error" });
     }
-  }
-
-
-  // const downloadVideo = () => {
-  //   const link = document.createElement("a");
-  //   link.href = videoUrl;
-  //   link.download = "recorded_video.webm";
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // };
+  };
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" p={4} height="100vh">
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      p={4}
+      height="100vh"
+    >
       <Text mb={4}>Question: {questionText}</Text>
-      <Box width="70%" bg="black" height="400px" display="flex" justifyContent="center" alignItems="center" mb={4}>
-        <video ref={videoRef} autoPlay muted width="100%" height="100%" style={{ backgroundColor: "black" }} />
+      <Box
+        width="70%"
+        bg="black"
+        height="400px"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        mb={4}
+      >
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          width="100%"
+          height="100%"
+          style={{ backgroundColor: "black" }}
+        />
       </Box>
-      <HStack spacing={4} mt={2}>
-        <Button colorScheme="blue" onClick={handlePermissions}>
-          Grant Permissions
-        </Button>
-        <Button colorScheme="green" onClick={startRecording} isDisabled={!mediaRecorder || isRecording}>
-          Start
-        </Button>
-        <Button colorScheme="red" onClick={stopRecording} isDisabled={!isRecording}>
-          Stop
-        </Button>
-        <Button colorScheme="purple" onClick={() => onSubmit(videoUrl)} isDisabled={!videoUrl}>
-          Submit
-        </Button>
-      </HStack>
+      {isLoading ? (
+        <Spinner size="xl" />
+      ) : (
+        <HStack spacing={4} mt={2}>
+          <Button colorScheme="blue" onClick={handlePermissions}>
+            Grant Permissions
+          </Button>
+          <Button
+            colorScheme="green"
+            onClick={startRecording}
+            isDisabled={!mediaRecorder || isRecording}
+          >
+            Start
+          </Button>
+          <Button
+            colorScheme="red"
+            onClick={stopRecording}
+            isDisabled={!isRecording}
+          >
+            Stop
+          </Button>
+          <Button
+            colorScheme="purple"
+            onClick={() => onSubmit(videoUrl)}
+            isDisabled={!videoUrl}
+          >
+            Submit
+          </Button>
+        </HStack>
+      )}
     </Box>
   );
 };

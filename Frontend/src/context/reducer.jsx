@@ -9,7 +9,7 @@ const reducer = (state, action) => {
     };
   }
   if (action.type === SET_LOADING) {
-    return { ...state, loading: true };
+    return { ...state, isLoading: action.payload };
   }
 };
 
