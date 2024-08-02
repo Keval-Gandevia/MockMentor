@@ -27,5 +27,15 @@ namespace MockMentorRESTAPI.Services
 
             return new Response() { statusCode = HttpStatusCode.Created, message = "Question added successfully", payload = res};
         }
+
+        public async Task<Response> GetQuestionByIdAsync(int questionId)
+        {
+            var question = await _questionRepository.GetQuestionByIdAsync(questionId);
+            if (question == null)
+            {
+                return new Response() { statusCode = HttpStatusCode.BadRequest, message = "Error fetching question." };
+            }
+            return new Response() { statusCode = HttpStatusCode.OK, message = "Question retrieved successfully", payload = question };
+        }
     }
 }

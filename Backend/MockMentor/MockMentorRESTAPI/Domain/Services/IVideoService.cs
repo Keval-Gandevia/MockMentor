@@ -1,6 +1,6 @@
-﻿using MockMentorRESTAPI.Domain.DTOs;
-using MockMentorRESTAPI.Domain.Models;
+﻿using MockMentorRESTAPI.Domain.Models;
 using MockMentorRESTAPI.Utilities;
+using MockMentorRESTAPI.Utilities.RequestModels;
 
 namespace MockMentorRESTAPI.Domain.Services
 {

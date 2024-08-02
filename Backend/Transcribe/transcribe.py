@@ -46,6 +46,7 @@ def transcribe_video(request_body):
     body = json.loads(request_body)
     question_id = body.get('questionId')
     video_url = body.get('videoUrl')
+    messageType = body.get('messageType')
     bucket_name = 'mock-mentor-bucket'
 
     print(f"Transcribing video with URL: {video_url}")
@@ -54,7 +55,8 @@ def transcribe_video(request_body):
 
     response = {
         'questionId': question_id,
-        'answerText': transcribed_text
+        'answerText': transcribed_text,
+        'messageType': messageType
     }
     return response
 

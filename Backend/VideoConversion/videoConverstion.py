@@ -37,6 +37,7 @@ def process_video_conversion(request_body):
     body = json.loads(request_body)
     question_id = body.get('questionId')
     video_url = body.get('videoUrl')
+    messageType = body.get('messageType')
     bucket_name = 'mock-mentor-bucket'
     
     converted_video_url = convert_video_format(bucket_name, video_url, question_id)
@@ -44,7 +45,8 @@ def process_video_conversion(request_body):
     
     response = {
         'questionId': question_id,
-        'convertedVideoUrl': converted_video_url
+        'videoUrl': converted_video_url,
+        'messageType': messageType
     }
     
     return response

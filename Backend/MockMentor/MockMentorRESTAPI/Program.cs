@@ -27,6 +27,9 @@ builder.Services.AddScoped<ISQSService, SQSService>();
 // Register repositories
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+builder.Services.AddScoped<IEmotionRepository, EmotionRepository>();
+builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
 
 // Enable cors
 builder.Services.AddCors(options =>

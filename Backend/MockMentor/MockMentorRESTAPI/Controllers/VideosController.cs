@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MockMentorRESTAPI.Domain.DTOs;
 using MockMentorRESTAPI.Domain.Models;
 using MockMentorRESTAPI.Domain.Services;
 using MockMentorRESTAPI.Utilities;
+using MockMentorRESTAPI.Utilities.RequestModels;
 using System.Diagnostics;
 
 namespace MockMentorRESTAPI.Controllers

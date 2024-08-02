@@ -54,6 +54,7 @@ def process_message(message, response_queue_url):
         body = json.loads(message['Body'])
         question_text = body.get('questionText')
         user_answer = body.get('answerText')
+        messageType = body.get('messageType')
 
         if not question_text or not user_answer:
             print("Missing 'questionText' or 'answerText' in message body.")
@@ -64,7 +65,8 @@ def process_message(message, response_queue_url):
         response_message = {
             'questionText': question_text,
             'answerText': user_answer,
-            'feedbackText': feedback
+            'feedbackText': feedback,
+            'messageType': messageType
         }
 
         try:

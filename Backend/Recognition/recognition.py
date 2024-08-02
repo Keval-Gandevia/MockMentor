@@ -130,6 +130,7 @@ def process_message(message, response_queue_url):
     body = json.loads(message['Body'])
     question_id = body.get('questionId')
     video_url = body.get('videoUrl')
+    messageType = body.get('messageType')
 
     video_id = video_url.split('/')[-1].split('_')[0]
 
@@ -139,7 +140,8 @@ def process_message(message, response_queue_url):
     response = {
         'questionId': question_id,
         'videoId': video_id,
-        'emotionValue': average_emotion
+        'emotionValue': average_emotion,
+        'messageType': messageType
     }
     send_response(response_queue_url, response)
 

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MockMentorRESTAPI.Domain.DTOs
+namespace MockMentorRESTAPI.Utilities.RequestModels
 {
     public class AddVideoRequest
     {

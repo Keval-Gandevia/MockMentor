@@ -1,8 +1,8 @@
-﻿using MockMentorRESTAPI.Domain.DTOs;
-using MockMentorRESTAPI.Domain.Models;
+﻿using MockMentorRESTAPI.Domain.Models;
 using MockMentorRESTAPI.Domain.Repositories;
 using MockMentorRESTAPI.Domain.Services;
 using MockMentorRESTAPI.Utilities;
+using MockMentorRESTAPI.Utilities.RequestModels;
 using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
@@ -14,7 +14,6 @@ namespace MockMentorRESTAPI.Services
         private readonly IVideoRepository _videoRepository;
         private readonly ISQSService _sqsservice;
         private readonly IConfiguration _configuration;
-        private readonly string QUEUE_NAME = "answer-request-queue";
 
         public VideoService(IVideoRepository videoRepository, ISQSService sqsService, IConfiguration configuration)
         {
@@ -33,17 +32,30 @@ namespace MockMentorRESTAPI.Services
 
             var res = await _videoRepository.AddVideosAsync(video);
 
-            string videoJson = JsonSerializer.Serialize(video);
+            var answerQueueRequest = new AnswerQueueRequest()
+            {
+                questionId = addVideoRequest.questionId,
+                videoUrl = addVideoRequest.videoUrl,
+                messageType = MessageType.TRANSCRIBE_VIDEO
+            };
+
+            var videoConvertQueueRequest = new VideoConvertQueueRequest()
+            {
+                questionId = addVideoRequest.questionId,
+                videoUrl = addVideoRequest.videoUrl,
+                messageType = MessageType.CONVERT_VIDEO
+            };
+
+            string answerMessageJson = JsonSerializer.Serialize(answerQueueRequest);
+            string convertVideoMessageJson = JsonSerializer.Serialize(videoConvertQueueRequest);
 
             string answerRequestQueueUrl = await _sqsservice.GetQueueUrlAsync(_configuration["AWS:SQS:AnswerRequestQueue"]);
             string videoConversionRequestQueueUrl = await _sqsservice.GetQueueUrlAsync(_configuration["AWS:SQS:VideoConversionRequestQueue"]);
 
-            await _sqsservice.SendMessage(answerRequestQueueUrl, videoJson);
-            await _sqsservice.SendMessage(videoConversionRequestQueueUrl, videoJson);
+            await _sqsservice.SendMessage(answerRequestQueueUrl, answerMessageJson);
+            await _sqsservice.SendMessage(videoConversionRequestQueueUrl, convertVideoMessageJson);
 
             return new Response() { statusCode = HttpStatusCode.Created, message = "Video added successfully.", payload = res };
-
         }
-
     }
 }
