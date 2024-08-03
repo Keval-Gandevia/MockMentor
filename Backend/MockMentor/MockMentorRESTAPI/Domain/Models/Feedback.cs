@@ -11,7 +11,6 @@ namespace MockMentorRESTAPI.Domain.Models
         public int feedbackId { get; set; }
         [Required]
         public string feedbackText { get; set; }
-
         [ForeignKey("Answer")]
         public int answerId { get; set; }
         public virtual Answer Answer { get; set; }

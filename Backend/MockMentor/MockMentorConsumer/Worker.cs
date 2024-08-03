@@ -74,16 +74,14 @@ namespace MockMentorConsumer
                                             IFeedbackWorkflow feedbackWorkflow = scope.ServiceProvider.GetRequiredService<IFeedbackWorkflow>();
                                             IQuestionService questionService = scope.ServiceProvider.GetRequiredService<IQuestionService>();
                                             IVideoService videoService = scope.ServiceProvider.GetRequiredService<IVideoService>();
-                                            IVideoAnalysisService videoAnalysisService = scope.ServiceProvider.GetRequiredService<IVideoAnalysisService>();
-                                            feedbackWorkflow.HandleFeedbackResponse(JsonConvert.DeserializeObject<FeedbackQueueResponse>(message.Body), feedbackService, answerService, questionService, videoService, videoAnalysisService);
+                                            feedbackWorkflow.HandleFeedbackResponse(JsonConvert.DeserializeObject<FeedbackQueueResponse>(message.Body), feedbackService, answerService, questionService, videoService);
                                         }
                                         if (body.messageType == MessageType.GET_EMOTION)
                                         {
                                             _logger.LogInformation("Get emotion queue response received.");
                                             IEmotionService emotionService = scope.ServiceProvider.GetRequiredService<IEmotionService>();
-                                            IVideoAnalysisService videoAnalysisService = scope.ServiceProvider.GetRequiredService<IVideoAnalysisService>();
                                             IRekognitionWorkflow rekognitionWorkflow = scope.ServiceProvider.GetRequiredService<IRekognitionWorkflow>();
-                                            rekognitionWorkflow.HandleRekognitionResponse(JsonConvert.DeserializeObject<RekognitionQueueResponse>(message.Body), emotionService, videoAnalysisService);
+                                            rekognitionWorkflow.HandleRekognitionResponse(JsonConvert.DeserializeObject<RekognitionQueueResponse>(message.Body), emotionService);
                                         }
                                     }
 

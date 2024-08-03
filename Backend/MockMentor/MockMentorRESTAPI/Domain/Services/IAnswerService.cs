@@ -1,6 +1,5 @@
 ﻿using MockMentorRESTAPI.Utilities;
 using MockMentorRESTAPI.Utilities.RequestModels;
-using MockMentorRESTAPI.Utilities.ResponseModels;
 
 namespace MockMentorRESTAPI.Domain.Services
 {

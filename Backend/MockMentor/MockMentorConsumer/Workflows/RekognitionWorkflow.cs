@@ -16,7 +16,7 @@ namespace MockMentorConsumer.Workflows
 {
     internal class RekognitionWorkflow : IRekognitionWorkflow
     {
-        public async Task HandleRekognitionResponse(RekognitionQueueResponse rekognitionQueueResponse, IEmotionService emotionService, IVideoAnalysisService videoAnalysisService)
+        public async Task HandleRekognitionResponse(RekognitionQueueResponse rekognitionQueueResponse, IEmotionService emotionService)
         {
             var addEmotionRequest = new AddEmotionRequest()
             {
@@ -24,27 +24,7 @@ namespace MockMentorConsumer.Workflows
                 emotionValue = rekognitionQueueResponse.emotionValue
             };
 
-            var emotionResponse = await emotionService.AddEmotionAsync(addEmotionRequest);
-            var emotion = (Emotion)emotionResponse.payload;
-
-            var getVideoAnalysisResponse = await videoAnalysisService.GetVideoAnalysisByVideoIdAsync(emotion.videoId);
-            var videoAnalysis = (VideoAnalysis)getVideoAnalysisResponse.payload;
-
-            if (getVideoAnalysisResponse.statusCode == HttpStatusCode.OK)
-            {
-                videoAnalysis.isRekognitionCompleted = true;
-                await videoAnalysisService.UpdateVideoAnalysisAsync(videoAnalysis);
-            }
-            else if (getVideoAnalysisResponse.statusCode == HttpStatusCode.NotFound)
-            {
-                var addVideoAnalysisRequest = new AddVideoAnalysisRequest()
-                {
-                    videoId = emotion.videoId,
-                    isRekognitionCompleted = true,
-                };
-
-                var res = await videoAnalysisService.AddVideoAnalysisAsync(addVideoAnalysisRequest);
-            }
+            await emotionService.AddEmotionAsync(addEmotionRequest);           
         }
     }
 }

@@ -25,7 +25,6 @@ builder.Services.AddScoped<IEmotionService, EmotionService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<ISQSService, SQSService>();
-builder.Services.AddScoped<IVideoAnalysisService, VideoAnalysisService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 
 // Register repositories
@@ -33,7 +32,6 @@ builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
 builder.Services.AddScoped<IEmotionRepository, EmotionRepository>();
 builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-builder.Services.AddScoped<IVideoAnalysisRepository, VideoAnalysisRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 
 // Enable cors
@@ -50,8 +48,8 @@ builder.Services.AddCors(options =>
 
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

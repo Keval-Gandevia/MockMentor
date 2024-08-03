@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MockMentorRESTAPI.Domain.Services;
 using MockMentorRESTAPI.Utilities;
-using System.Diagnostics;
 
 namespace MockMentorRESTAPI.Controllers
 {

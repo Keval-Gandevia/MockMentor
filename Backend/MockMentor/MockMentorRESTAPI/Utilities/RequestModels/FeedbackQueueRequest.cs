@@ -6,6 +6,5 @@
         public required string questionText { get; set; }
         public required string answerText { get; set; }
         public required MessageType messageType { get; set; }
-
     }
 }

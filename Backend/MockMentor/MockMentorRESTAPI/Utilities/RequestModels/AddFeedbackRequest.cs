@@ -6,7 +6,6 @@ namespace MockMentorRESTAPI.Utilities.RequestModels
     {
         [Required]
         public required string feedbackText { get; set; }
-
         [Required]
         public int answerId { get; set; }
     }

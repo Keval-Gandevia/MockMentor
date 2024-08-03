@@ -4,7 +4,6 @@ using MockMentorRESTAPI.Domain.Services;
 using MockMentorRESTAPI.Persistence.Repositories;
 using MockMentorRESTAPI.Utilities;
 using MockMentorRESTAPI.Utilities.RequestModels;
-using MockMentorRESTAPI.Utilities.ResponseModels;
 using System.Net;
 
 namespace MockMentorRESTAPI.Services

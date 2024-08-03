@@ -11,6 +11,6 @@ namespace MockMentorConsumer.Domain.Workflows
 {
     public interface IFeedbackWorkflow
     {
-        Task HandleFeedbackResponse(FeedbackQueueResponse feedbackQueueResponse, IFeedbackService feedbackService, IAnswerService answerService, IQuestionService questionService, IVideoService videoService, IVideoAnalysisService videoAnalysisService);
+        Task HandleFeedbackResponse(FeedbackQueueResponse feedbackQueueResponse, IFeedbackService feedbackService, IAnswerService answerService, IQuestionService questionService, IVideoService videoService);
     }
 }

@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using MockMentorRESTAPI.Domain.Models;
 using MockMentorRESTAPI.Domain.Services;
 using MockMentorRESTAPI.Utilities;
-using MockMentorRESTAPI.Utilities.RequestModels;
-using System.Diagnostics;
-using System.Net;
 
 namespace MockMentorRESTAPI.Controllers
 {

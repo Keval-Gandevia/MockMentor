@@ -11,12 +11,9 @@ namespace MockMentorRESTAPI.Domain.Models
         public int videoId {  get; set; }
         [Required]
         public string? videoUrl { get; set; }
-
         [ForeignKey("Question")]
         public int questionId { get; set; }
         public virtual Question Question { get; set; }
-
         public virtual Emotion? Emotion { get; set; }
-        public virtual VideoAnalysis? VideoAnalysis { get; set; }
     }
 }

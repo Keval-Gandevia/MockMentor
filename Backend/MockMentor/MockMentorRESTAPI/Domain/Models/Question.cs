@@ -11,7 +11,6 @@ namespace MockMentorRESTAPI.Domain.Models
         public int questionId { get; set; }
         [Required]
         public string? questionText { get; set; }
-
         public virtual Video? video { get; set; }
         public virtual Answer? Answer { get; set; }
     }

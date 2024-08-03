@@ -1,7 +1,14 @@
 import axios from "axios";
 import { createContext, useContext, useReducer } from "react";
 import reducer from "./reducer";
-import { ADD_QUESTION, ADD_VIDEO, RESET_STATE, SET_EMOTION, SET_FEEDBACK, SET_LOADING } from "./actions";
+import {
+  ADD_QUESTION,
+  ADD_VIDEO,
+  RESET_STATE,
+  SET_EMOTION,
+  SET_FEEDBACK,
+  SET_LOADING,
+} from "./actions";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -44,7 +51,6 @@ const AppProvider = ({ children }) => {
     dispatch({ type: SET_LOADING, payload: true });
     try {
       const res = await api.post(URL.addQuestionURL, data);
-      console.log(res.data);
       if (res.data.statusCode === 201) {
         dispatch({ type: ADD_QUESTION, data: res.data.payload });
       }
@@ -84,7 +90,6 @@ const AppProvider = ({ children }) => {
     try {
       const blob = await fetch(videoUrl).then((res) => res.blob());
       const videoS3Url = await uploadVideoToS3(blob);
-      console.log(videoS3Url);
       return await addVideo(videoS3Url);
     } catch (error) {
       alert("Error submitting video");
@@ -112,9 +117,9 @@ const AppProvider = ({ children }) => {
   const getFeedback = async () => {
     dispatch({ type: SET_LOADING, payload: true });
     try {
-      console.log("printing questionid: " + state.questionId);
-      const res = await api.get(`${URL.getFeedbackURL}?questionId=${state.questionId}`);
-      console.log("printing feedback: " + res);
+      const res = await api.get(
+        `${URL.getFeedbackURL}?questionId=${state.questionId}`
+      );
       if (res.data.statusCode !== 404) {
         dispatch({ type: SET_FEEDBACK, data: res.data.payload });
       }
@@ -130,11 +135,11 @@ const AppProvider = ({ children }) => {
   const getEmotion = async () => {
     dispatch({ type: SET_LOADING, payload: true });
     try {
-      console.log("printing questionid: " + state.videoId);
-      const res = await api.get(`${URL.getEmotionURL}?videoId=${state.videoId}`);
-      console.log("printing emotion: " + JSON.stringify(res.data.payload));
+      const res = await api.get(
+        `${URL.getEmotionURL}?videoId=${state.videoId}`
+      );
       if (res.data.statusCode !== 404) {
-        dispatch({ type: SET_EMOTION, data: res.data.payload});
+        dispatch({ type: SET_EMOTION, data: res.data.payload });
       }
       return res.data;
     } catch (error) {
@@ -147,7 +152,7 @@ const AppProvider = ({ children }) => {
 
   const clearLocalStorage = () => {
     localStorage.clear();
-    dispatch({type: RESET_STATE})
+    dispatch({ type: RESET_STATE });
   };
 
   return (

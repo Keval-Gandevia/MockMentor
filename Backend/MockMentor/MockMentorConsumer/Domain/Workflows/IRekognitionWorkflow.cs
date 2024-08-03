@@ -10,6 +10,6 @@ namespace MockMentorConsumer.Domain.Workflows
 {
     public interface IRekognitionWorkflow
     {
-        Task HandleRekognitionResponse(RekognitionQueueResponse rekognitionQueueResponse, IEmotionService emotionService, IVideoAnalysisService videoAnalysisService);
+        Task HandleRekognitionResponse(RekognitionQueueResponse rekognitionQueueResponse, IEmotionService emotionService);
     }
 }

@@ -15,7 +15,7 @@ namespace MockMentorConsumer.Workflows
 {
     public class FeedbackWorkflow : IFeedbackWorkflow
     {
-        public async Task HandleFeedbackResponse(FeedbackQueueResponse feedbackQueueResponse, IFeedbackService feedbackService, IAnswerService answerService, IQuestionService questionService, IVideoService videoService, IVideoAnalysisService videoAnalysisService)
+        public async Task HandleFeedbackResponse(FeedbackQueueResponse feedbackQueueResponse, IFeedbackService feedbackService, IAnswerService answerService, IQuestionService questionService, IVideoService videoService)
         {
             var addFeedbackRequest = new AddFeedbackRequest()
             {
@@ -23,38 +23,7 @@ namespace MockMentorConsumer.Workflows
                 feedbackText = feedbackQueueResponse.feedbackText
             };
 
-            var feedbackResponse = await feedbackService.AddFeedbackAsync(addFeedbackRequest);
-            var feedback = (Feedback)feedbackResponse.payload;
-
-            var answerResponse = await answerService.GetAnswerByIdAsync(feedbackQueueResponse.answerId);
-            var answer = (Answer)answerResponse.payload;
-
-            var questionResponse = await questionService.GetQuestionByIdAsync(answer.questionId);
-            var question = (Question)questionResponse.payload;
-
-            var videoResponse = await videoService.GetVideoByQuestionIdAsync(question.questionId);
-            var video = (Video)videoResponse.payload;
-
-            var getVideoAnalysisResponse = await videoAnalysisService.GetVideoAnalysisByVideoIdAsync(video.videoId);
-            var videoAnalysis = (VideoAnalysis)getVideoAnalysisResponse.payload;
-
-            
-
-            if(getVideoAnalysisResponse.statusCode == HttpStatusCode.OK)
-            {
-                videoAnalysis.isFeedbackCompleted = true;
-                await videoAnalysisService.UpdateVideoAnalysisAsync(videoAnalysis);
-            }
-            else if (getVideoAnalysisResponse.statusCode == HttpStatusCode.NotFound)
-            {
-                var addVideoAnalysisRequest = new AddVideoAnalysisRequest()
-                {
-                    videoId = video.videoId,
-                    isFeedbackCompleted = true,
-                };
-
-                var res = await videoAnalysisService.AddVideoAnalysisAsync(addVideoAnalysisRequest);
-            }
+            await feedbackService.AddFeedbackAsync(addFeedbackRequest);
         }
     }
 }

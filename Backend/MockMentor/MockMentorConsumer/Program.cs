@@ -29,7 +29,6 @@ IHost host = builder.ConfigureServices((hostContext, services) =>
     services.AddScoped<IQuestionService, QuestionService>();
     services.AddScoped<IFeedbackService, FeedbackService>();
     services.AddScoped<ISQSService, SQSService>();
-    services.AddScoped<IVideoAnalysisService, VideoAnalysisService>();
     services.AddScoped<IVideoService, VideoService>();
 
     // Register repositories
@@ -37,7 +36,6 @@ IHost host = builder.ConfigureServices((hostContext, services) =>
     services.AddScoped<IEmotionRepository, EmotionRepository>();
     services.AddScoped<IFeedbackRepository, FeedbackRepository>();
     services.AddScoped<IQuestionRepository, QuestionRepository>();
-    services.AddScoped<IVideoAnalysisRepository, VideoAnalysisRepository>();
     services.AddScoped<IVideoRepository, VideoRepository>();
 
     services.AddScoped<IVideoConversionWorkflow, VideoConversionWorkflow>();
