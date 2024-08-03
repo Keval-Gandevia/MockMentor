@@ -9,6 +9,7 @@ const RecordVideo = () => {
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [videoUrl, setVideoUrl] = useState("");
   const videoRef = useRef(null);
+  const streamRef = useRef(null);
   const recordedChunks = useRef([]);
   const { showToast } = ToastNotification();
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const RecordVideo = () => {
         video: true,
         audio: true,
       });
+      streamRef.current = stream;
       videoRef.current.srcObject = stream;
       const recorder = new MediaRecorder(stream);
       recorder.ondataavailable = (event) => {
@@ -51,7 +53,15 @@ const RecordVideo = () => {
     setIsRecording(false);
   };
 
+  const stopStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
+
   const onSubmit = async (videoUrl) => {
+    stopStream();
     const response = await handleVideoSubmit(videoUrl);
     if (response.statusCode === 201) {
       showToast({ message: response.message, status: "success" });
