@@ -1,5 +1,7 @@
 import { Container, Heading, Text, VStack, Stack, Card, CardBody, CardHeader, Badge, Icon, SimpleGrid } from '@chakra-ui/react';
 import { QuestionIcon, ViewIcon, InfoOutlineIcon, ArrowForwardIcon, CheckCircleIcon } from '@chakra-ui/icons';
+import { useAppContext } from '../context/AppContext';
+import { useEffect } from 'react';
 
 const features = [
   {
@@ -47,6 +49,16 @@ const steps = [
 ];
 
 const LandingPage = () => {
+
+
+  const {clearLocalStorage} = useAppContext();
+
+  useEffect(() => {
+    clearLocalStorage();
+  }, [])
+  
+
+
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} textAlign="center">

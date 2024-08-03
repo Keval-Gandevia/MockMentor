@@ -1,7 +1,7 @@
 import axios from "axios";
 import { createContext, useContext, useReducer } from "react";
 import reducer from "./reducer";
-import { ADD_QUESTION, ADD_VIDEO, SET_EMOTION, SET_FEEDBACK, SET_LOADING } from "./actions";
+import { ADD_QUESTION, ADD_VIDEO, RESET_STATE, SET_EMOTION, SET_FEEDBACK, SET_LOADING } from "./actions";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -147,6 +147,7 @@ const AppProvider = ({ children }) => {
 
   const clearLocalStorage = () => {
     localStorage.clear();
+    dispatch({type: RESET_STATE})
   };
 
   return (

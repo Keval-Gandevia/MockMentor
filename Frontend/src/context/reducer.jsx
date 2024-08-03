@@ -1,4 +1,4 @@
-import { ADD_QUESTION, ADD_VIDEO, SET_EMOTION, SET_FEEDBACK, SET_LOADING } from "./actions";
+import { ADD_QUESTION, ADD_VIDEO, RESET_STATE, SET_EMOTION, SET_FEEDBACK, SET_LOADING } from "./actions";
 
 const reducer = (state, action) => {
   if (action.type === ADD_QUESTION) {
@@ -22,9 +22,18 @@ const reducer = (state, action) => {
     return { ...state, feedbackText: action.data.feedbackText };
   }
   if (action.type === SET_EMOTION) {
-    console.log(JSON.stringify(action.data.emotionValue))
     localStorage.setItem("emotionValue", JSON.stringify(action.data.emotionValue))
-    return { ...state, emotionValue: (action.data.emotionValue) };
+    return { ...state, emotionValue: action.data.emotionValue };
+  }
+  if (action.type === RESET_STATE) {
+    return {
+      questionId: 0,
+      questionText: "",
+      isLoading: false,
+      videoId: 0,
+      feedbackText: "Result is pending",
+      emotionValue: "Result is pending",
+    };
   }
 };
 
