@@ -30,14 +30,16 @@ namespace MockMentorConsumer.Workflows
                 questionId = answerQueueResponse.questionId,
                 answerText = answerQueueResponse.answerText
             };
-            await answerService.AddAnswerAsync(addAnswerRequest);
+            var answerResponse = await answerService.AddAnswerAsync(addAnswerRequest);
 
             var questionResponse = await questionService.GetQuestionByIdAsync(answerQueueResponse.questionId);
 
             var question = (Question)questionResponse.payload;
+            var answer = (Answer)answerResponse.payload;
 
             var feedbackQueueRequest = new FeedbackQueueRequest()
             {
+                answerId = answer.answerId,
                 questionText = question.questionText,
                 answerText = answerQueueResponse.answerText,
                 messageType = MessageType.GET_FEEDBACK

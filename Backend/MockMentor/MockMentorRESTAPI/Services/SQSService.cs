@@ -1,6 +1,7 @@
 ﻿using Amazon.SQS;
 using Amazon.SQS.Model;
 using MockMentorRESTAPI.Domain.Services;
+using System.Net;
 
 namespace MockMentorRESTAPI.Services
 {
@@ -50,5 +51,16 @@ namespace MockMentorRESTAPI.Services
             return response.Messages;
         }
 
+        public async Task<bool> DeleteMessageAsync(string queueUrl, string receiptHandle)
+        {
+            var deleteMessageRequest = new DeleteMessageRequest
+            {
+                QueueUrl = queueUrl,
+                ReceiptHandle = receiptHandle
+            };
+
+            var response = await _sqsClient.DeleteMessageAsync(deleteMessageRequest);
+            return response.HttpStatusCode == HttpStatusCode.OK;
+        }
     }
 }

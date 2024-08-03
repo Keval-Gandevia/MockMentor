@@ -53,6 +53,7 @@ def process_message(message, response_queue_url):
     try:
         body = json.loads(message['Body'])
         question_text = body.get('questionText')
+        answerId = body.get('answerId')
         user_answer = body.get('answerText')
         messageType = body.get('messageType')
 
@@ -66,7 +67,8 @@ def process_message(message, response_queue_url):
             'questionText': question_text,
             'answerText': user_answer,
             'feedbackText': feedback,
-            'messageType': messageType
+            'messageType': messageType,
+            'answerId': answerId
         }
 
         try:

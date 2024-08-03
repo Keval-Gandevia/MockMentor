@@ -24,7 +24,6 @@ namespace MockMentorRESTAPI.Controllers
         [HttpPost(APIRoutes.ADD_QUESTION)]
         public async Task<Response> AddQuestion([FromBody] Question question)
         {
-            Debug.WriteLine("Add request is received");
             return await _questionService.AddQuestionAsync(question);
         }
     }

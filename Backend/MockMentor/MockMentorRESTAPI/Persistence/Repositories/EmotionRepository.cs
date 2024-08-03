@@ -1,4 +1,5 @@
-﻿using MockMentorRESTAPI.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using MockMentorRESTAPI.Domain.Models;
 using MockMentorRESTAPI.Domain.Repositories;
 using MockMentorRESTAPI.Persistence.Contexts;
 
@@ -13,6 +14,11 @@ namespace MockMentorRESTAPI.Persistence.Repositories
             await _context.Emotions.AddAsync(emotion);
             await _context.SaveChangesAsync();
             return emotion;
+        }
+
+        public async Task<Emotion> GetEmotionByVideoIdAsync(int videoId)
+        {
+            return await _context.Emotions.FirstOrDefaultAsync(e => e.videoId == videoId);
         }
     }
 }

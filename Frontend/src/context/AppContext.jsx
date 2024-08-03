@@ -1,7 +1,7 @@
 import axios from "axios";
 import { createContext, useContext, useReducer } from "react";
 import reducer from "./reducer";
-import { ADD_QUESTION, ADD_VIDEO, SET_LOADING } from "./actions";
+import { ADD_QUESTION, ADD_VIDEO, SET_EMOTION, SET_FEEDBACK, SET_LOADING } from "./actions";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -22,12 +22,17 @@ const api = axios.create({
 const URL = {
   addQuestionURL: `/Questions/addQuestion`,
   addVideoURL: `/Videos/addVideo`,
+  getFeedbackURL: `/Feedbacks/getFeedback`,
+  getEmotionURL: `/Emotions/getEmotion`,
 };
 
 const initialState = {
-  questionId: 0,
-  questionText: "",
+  questionId: localStorage.getItem("questionId") || 0,
+  questionText: localStorage.getItem("questionText") || "",
   isLoading: false,
+  videoId: localStorage.getItem("videoId") || 0,
+  feedbackText: localStorage.getItem("feedbackText") || "Result is pending",
+  emotionValue: localStorage.getItem("emotionValue") || "Result is pending",
 };
 
 const AppContext = createContext();
@@ -39,7 +44,7 @@ const AppProvider = ({ children }) => {
     dispatch({ type: SET_LOADING, payload: true });
     try {
       const res = await api.post(URL.addQuestionURL, data);
-      console.log(res.data)
+      console.log(res.data);
       if (res.data.statusCode === 201) {
         dispatch({ type: ADD_QUESTION, data: res.data.payload });
       }
@@ -47,9 +52,8 @@ const AppProvider = ({ children }) => {
     } catch (error) {
       console.error("Error while adding question!", error);
       return { statusCode: 500, message: "Error while adding question" };
-    }
-    finally {
-      dispatch({type: SET_LOADING, payload: false})
+    } finally {
+      dispatch({ type: SET_LOADING, payload: false });
     }
   };
 
@@ -61,11 +65,13 @@ const AppProvider = ({ children }) => {
         Bucket: bucketName,
         Key: key,
         Body: blob,
-        ContentType: "video/webm"
+        ContentType: "video/webm",
       });
 
       await s3Client.send(command);
-      const url = `https://${bucketName}.s3.${import.meta.env.VITE_AWS_REGION}.amazonaws.com/${key}`;
+      const url = `https://${bucketName}.s3.${
+        import.meta.env.VITE_AWS_REGION
+      }.amazonaws.com/${key}`;
       return url;
     } catch (error) {
       console.error("Error uploading video to S3", error);
@@ -89,19 +95,59 @@ const AppProvider = ({ children }) => {
     dispatch({ type: SET_LOADING, payload: true });
     const video = {
       questionId: state.questionId,
-      videoUrl: videoUrl
-    }
+      videoUrl: videoUrl,
+    };
     try {
       const res = await api.post(URL.addVideoURL, video);
+      dispatch({ type: ADD_VIDEO, data: res.data.payload });
       return res.data;
     } catch (error) {
       console.error("Error while adding video!", error);
       return { statusCode: 500, message: "Error while adding video" };
+    } finally {
+      dispatch({ type: SET_LOADING, payload: false });
     }
-    finally {
-      dispatch({type: SET_LOADING, payload: false})
+  };
+
+  const getFeedback = async () => {
+    dispatch({ type: SET_LOADING, payload: true });
+    try {
+      console.log("printing questionid: " + state.questionId);
+      const res = await api.get(`${URL.getFeedbackURL}?questionId=${state.questionId}`);
+      console.log("printing feedback: " + res);
+      if (res.data.statusCode !== 404) {
+        dispatch({ type: SET_FEEDBACK, data: res.data.payload });
+      }
+      return res.data;
+    } catch (error) {
+      console.error("Error while fetching feedback", error);
+      return { statusCode: 500, message: "Error while fetching feedback" };
+    } finally {
+      dispatch({ type: SET_LOADING, payload: false });
     }
-  }
+  };
+
+  const getEmotion = async () => {
+    dispatch({ type: SET_LOADING, payload: true });
+    try {
+      console.log("printing questionid: " + state.videoId);
+      const res = await api.get(`${URL.getEmotionURL}?videoId=${state.videoId}`);
+      console.log("printing emotion: " + JSON.stringify(res.data.payload));
+      if (res.data.statusCode !== 404) {
+        dispatch({ type: SET_EMOTION, data: res.data.payload});
+      }
+      return res.data;
+    } catch (error) {
+      console.error("Error while fetching feedback", error);
+      return { statusCode: 500, message: "Error while fetching feedback" };
+    } finally {
+      dispatch({ type: SET_LOADING, payload: false });
+    }
+  };
+
+  const clearLocalStorage = () => {
+    localStorage.clear();
+  };
 
   return (
     <AppContext.Provider
@@ -109,6 +155,9 @@ const AppProvider = ({ children }) => {
         ...state,
         handleAddQuestionSubmit,
         handleVideoSubmit,
+        getFeedback,
+        getEmotion,
+        clearLocalStorage,
       }}
     >
       {children}

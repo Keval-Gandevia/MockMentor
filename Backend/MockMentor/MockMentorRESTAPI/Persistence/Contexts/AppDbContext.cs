@@ -12,5 +12,6 @@ namespace MockMentorRESTAPI.Persistence.Contexts
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Emotion> Emotions { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<VideoAnalysis> VideoAnalyses { get; set; }
     }
 }

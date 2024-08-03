@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace MockMentorConsumer.Domain.Workflows
 {
-    public interface IVideoConversionWorkflow
+    public interface IRekognitionWorkflow
     {
-        Task HandleVideoConversionResponse(VideoConversionQueueResponse videoConversionQueueResponse, ISQSService sQSService);
+        Task HandleRekognitionResponse(RekognitionQueueResponse rekognitionQueueResponse, IEmotionService emotionService, IVideoAnalysisService videoAnalysisService);
     }
 }

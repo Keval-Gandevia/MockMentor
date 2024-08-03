@@ -57,5 +57,17 @@ namespace MockMentorRESTAPI.Services
 
             return new Response() { statusCode = HttpStatusCode.Created, message = "Video added successfully.", payload = res };
         }
+
+        public async Task<Response> GetVideoByQuestionIdAsync(int questionId)
+        {
+            var video = _videoRepository.GetVideoByQuestionIdAsync(questionId);
+
+            if(video == null)
+            {
+                return new Response() { statusCode = HttpStatusCode.NotFound, message = "Video does not exist" };
+            }
+
+            return new Response() { statusCode = HttpStatusCode.OK, message = "Video retrieved successfully", payload = video };
+        }
     }
 }

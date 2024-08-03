@@ -17,5 +17,6 @@ namespace MockMentorRESTAPI.Domain.Models
         public virtual Question Question { get; set; }
 
         public virtual Emotion? Emotion { get; set; }
+        public virtual VideoAnalysis? VideoAnalysis { get; set; }
     }
 }

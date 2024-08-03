@@ -1,6 +1,7 @@
 ﻿using MockMentorRESTAPI.Domain.Models;
 using MockMentorRESTAPI.Domain.Repositories;
 using MockMentorRESTAPI.Domain.Services;
+using MockMentorRESTAPI.Persistence.Repositories;
 using MockMentorRESTAPI.Utilities;
 using MockMentorRESTAPI.Utilities.RequestModels;
 using MockMentorRESTAPI.Utilities.ResponseModels;
@@ -27,8 +28,18 @@ namespace MockMentorRESTAPI.Services
 
             var res = await _answerRepository.AddAnswerAsync(answer);
 
-            return new Response() { statusCode = HttpStatusCode.OK, message = "Answer added successfully.", payload = answer };
+            return new Response() { statusCode = HttpStatusCode.OK, message = "Answer added successfully.", payload = res };
             
+        }
+
+        public async Task<Response> GetAnswerByIdAsync(int answerId)
+        {
+            var answer = await _answerRepository.GetAnswerAsync(answerId);
+            if (answer == null)
+            {
+                return new Response() { statusCode = HttpStatusCode.BadRequest, message = "Error fetching answer." };
+            }
+            return new Response() { statusCode = HttpStatusCode.OK, message = "Answer retrieved successfully", payload = answer };
         }
     }
 }
