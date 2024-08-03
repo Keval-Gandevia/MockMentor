@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.400.2" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.400" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.7">
       <PrivateAssets>all</PrivateAssets>
@@ -14,16 +17,6 @@
     </PackageReference>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Domain\Models\" />
-    <Folder Include="Domain\Services\" />
-    <Folder Include="Domain\Repositories\" />
-    <Folder Include="Services\" />
-    <Folder Include="Persistence\Contexts\" />
-    <Folder Include="Persistence\Repositories\" />
   </ItemGroup>
 
 </Project>
