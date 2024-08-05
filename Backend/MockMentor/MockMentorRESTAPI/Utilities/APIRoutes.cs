@@ -8,5 +8,6 @@
         public const string ADD_VIDEO = "addVideo";
         public const string GET_FEEDBACK = "getFeedback";
         public const string GET_EMOTION = "getEmotion";
+        public const string HEALTH_CHECK = "healthCheck";
     }
 }

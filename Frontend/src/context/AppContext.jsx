@@ -23,7 +23,8 @@ const s3Client = new S3Client({
 
 // set-up the basic API call with axios.
 const api = axios.create({
-  baseURL: `${window.location.origin}:8080/api`,
+  // baseURL: `${window.location.origin}:8080/api`,
+  baseURL: `https://localhost:44337/api`,
 });
 
 const URL = {
