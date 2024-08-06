@@ -93,6 +93,7 @@ def listen_for_messages(request_queue_name, response_queue_name):
                 )
 
 if __name__ == '__main__':
+    print("video conversion is running....")
     request_queue_name = 'video-conversion-request-queue'
     response_queue_name = 'video-conversion-response-queue'
     listen_for_messages(request_queue_name, response_queue_name)

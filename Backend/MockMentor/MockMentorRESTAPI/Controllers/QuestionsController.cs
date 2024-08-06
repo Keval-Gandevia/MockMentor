@@ -26,9 +26,13 @@ namespace MockMentorRESTAPI.Controllers
         }
 
         [HttpGet(APIRoutes.HEALTH_CHECK)]
-        public async Task<HttpStatusCode> HealthCheck()
+        public async Task<Response> HealthCheck()
         {
-            return HttpStatusCode.OK;
+            return new Response()
+            {
+                statusCode = HttpStatusCode.OK,
+                message = "Health check up is done."
+            };
         }
     }
 }

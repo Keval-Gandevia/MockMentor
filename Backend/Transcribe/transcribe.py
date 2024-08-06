@@ -106,6 +106,7 @@ def listen_for_messages(request_queue_name, response_queue_name):
                 )
 
 if __name__ == '__main__':
+    print("transcribe is running.....")
     request_queue_name = 'answer-request-queue'
     response_queue_name = 'answer-response-queue'
     listen_for_messages(request_queue_name, response_queue_name)

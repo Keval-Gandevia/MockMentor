@@ -103,6 +103,7 @@ def listen_for_messages(request_queue_name, response_queue_name):
                 )
 
 if __name__ == '__main__':
+    print("feedback is running....")
     request_queue_name = 'feedback-request-queue'
     response_queue_name = 'feedback-response-queue'
     listen_for_messages(request_queue_name, response_queue_name)
