@@ -3,9 +3,12 @@ import cv2
 import os
 import urllib.parse
 import json
+import threading
+from queue import Queue
 from collections import defaultdict
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 
+# AWS clients
 region_name = os.getenv('AWS_DEFAULT_REGION')
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -52,19 +55,22 @@ def download_video_from_s3(video_url, download_path):
     except Exception as e:
         print(f"Error downloading video: {str(e)}")
 
-def get_frames(video_path):
+def get_frames(video_path, skip_frames=5):
     print(f"Getting frames from video: {video_path}")
     video_capture = cv2.VideoCapture(video_path)
     frames = []
+    frame_count = 0
     success, frame = video_capture.read()
     while success:
-        frames.append(frame)
+        if frame_count % skip_frames == 0:
+            frames.append(frame)
         success, frame = video_capture.read()
+        frame_count += 1
     video_capture.release()
     print(f"Extracted {len(frames)} frames from video")
     return frames
 
-def detect_emotions_in_frame(frame):
+def detect_emotions_in_frame(frame, results_queue):
     print("Detecting emotions in frame")
     _, encoded_image = cv2.imencode('.jpg', frame)
     response = rekognition.detect_faces(
@@ -76,9 +82,9 @@ def detect_emotions_in_frame(frame):
         for face_detail in response['FaceDetails']:
             emotions.extend(face_detail['Emotions'])
     print(f"Detected {len(emotions)} emotions in frame")
-    return emotions
+    results_queue.put(emotions)
 
-def analyze_video_emotions(video_url):
+def analyze_video_emotions(video_url, num_threads=4):
     print(f"Analyzing emotions in video: {video_url}")
     download_path = 'video.mp4'
     download_video_from_s3(video_url, download_path)
@@ -86,9 +92,21 @@ def analyze_video_emotions(video_url):
     frames = get_frames(download_path)
     all_emotions = []
     
+    results_queue = Queue()
+    threads = []
+    
     for frame in frames:
-        emotions = detect_emotions_in_frame(frame)
-        all_emotions.extend(emotions)
+        while threading.active_count() > num_threads:
+            pass
+        thread = threading.Thread(target=detect_emotions_in_frame, args=(frame, results_queue))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    while not results_queue.empty():
+        all_emotions.extend(results_queue.get())
 
     if os.path.exists(download_path):
         os.remove(download_path)
@@ -125,6 +143,7 @@ def send_response(response_queue_url, message):
         QueueUrl=response_queue_url,
         MessageBody=json.dumps(message)
     )
+    print("Response message sent")
 
 def process_message(message, response_queue_url):
     body = json.loads(message['Body'])
@@ -166,6 +185,7 @@ def listen_for_messages(request_queue_name, response_queue_name):
                 )
 
 if __name__ == "__main__":
+    print("Recognition is running....")
     request_queue_name = 'emotion-request-queue'
     response_queue_name = 'emotion-response-queue'
     listen_for_messages(request_queue_name, response_queue_name)

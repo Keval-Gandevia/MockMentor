@@ -47,7 +47,7 @@ def transcribe_video(request_body):
     question_id = body.get('questionId')
     video_url = body.get('videoUrl')
     messageType = body.get('messageType')
-    bucket_name = 'mock-mentor-bucket'
+    bucket_name = 'cloud-mockmentor-bucket'
 
     print(f"Transcribing video with URL: {video_url}")
     transcribed_text = extract_speech_from_video(bucket_name, video_url)
@@ -106,6 +106,7 @@ def listen_for_messages(request_queue_name, response_queue_name):
                 )
 
 if __name__ == '__main__':
+    print("transcribe is running.....")
     request_queue_name = 'answer-request-queue'
     response_queue_name = 'answer-response-queue'
     listen_for_messages(request_queue_name, response_queue_name)

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MockMentorRESTAPI.Domain.Models;
 using MockMentorRESTAPI.Domain.Services;
 using MockMentorRESTAPI.Utilities;
+using System.Net;
 
 namespace MockMentorRESTAPI.Controllers
 {
@@ -22,6 +23,16 @@ namespace MockMentorRESTAPI.Controllers
         public async Task<Response> AddQuestion([FromBody] Question question)
         {
             return await _questionService.AddQuestionAsync(question);
+        }
+
+        [HttpGet(APIRoutes.HEALTH_CHECK)]
+        public async Task<Response> HealthCheck()
+        {
+            return new Response()
+            {
+                statusCode = HttpStatusCode.OK,
+                message = "Health check up is done."
+            };
         }
     }
 }

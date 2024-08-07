@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-MockMentorConsumer-ec2df360-a6cc-48cf-ba38-fa9f8c8337b8</UserSecretsId>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,5 +22,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MockMentorRESTAPI\MockMentorRESTAPI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Domain\Workflows\" />
+    <None Remove="Workflows\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Domain\Workflows\" />
+    <Folder Include="Workflows\" />
   </ItemGroup>
 </Project>

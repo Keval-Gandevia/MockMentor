@@ -5,7 +5,10 @@ namespace MockMentorRESTAPI.Persistence.Contexts
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
+        {
+            Database.EnsureCreated();
+        }
 
         public DbSet<Question> Questions { get; set; }
         public DbSet<Video> Videos { get; set; }

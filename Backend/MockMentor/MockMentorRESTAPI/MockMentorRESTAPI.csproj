@@ -18,5 +18,24 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Remove="Controllers\" />
+    <None Remove="Domain\Models" />
+    <None Remove="Domain\Repositories" />
+    <None Remove="Domain\Services" />
+    <None Remove="Persistence\Contexts" />
+    <None Remove="Persistence\Repositories" />
+    <None Remove="Services\" />
+    <None Remove="Utilities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Domain\Models" />
+    <Folder Include="Domain\Repositories" />
+    <Folder Include="Domain\Services" />
+    <Folder Include="Persistence\Contexts" />
+    <Folder Include="Persistence\Repositories" />
+    <Folder Include="Services\" />
+    <Folder Include="Utilities\" />
+  </ItemGroup>
 </Project>
