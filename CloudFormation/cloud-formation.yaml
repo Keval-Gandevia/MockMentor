@@ -313,8 +313,6 @@ Resources:
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
-        - !Ref PrivateSubnetNgw1e
-        - !Ref PrivateSubnetNgw1f
       SecurityGroups:
         - !Ref MockmentorSecurityGroupPublic
       Type: application
