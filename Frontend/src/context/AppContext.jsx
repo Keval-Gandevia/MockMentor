@@ -73,7 +73,7 @@ const AppProvider = ({ children }) => {
         Key: key,
         Body: blob,
         ContentType: "video/webm",
-        ACL: "public-read"
+        // ACL: "public-read"
       });
 
       await s3Client.send(command);

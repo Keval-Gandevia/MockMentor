@@ -47,7 +47,7 @@ def transcribe_video(request_body):
     question_id = body.get('questionId')
     video_url = body.get('videoUrl')
     messageType = body.get('messageType')
-    bucket_name = 'mock-mentor-bucket'
+    bucket_name = 'cloud-mockmentor-bucket'
 
     print(f"Transcribing video with URL: {video_url}")
     transcribed_text = extract_speech_from_video(bucket_name, video_url)

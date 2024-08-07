@@ -38,7 +38,7 @@ def process_video_conversion(request_body):
     question_id = body.get('questionId')
     video_url = body.get('videoUrl')
     messageType = body.get('messageType')
-    bucket_name = 'mock-mentor-bucket'
+    bucket_name = 'cloud-mockmentor-bucket'
     
     converted_video_url = convert_video_format(bucket_name, video_url, question_id)
     print(f"Converted video URL: {converted_video_url}")
