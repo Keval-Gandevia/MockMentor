@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
   S3Bucket:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     Properties: 
-      BucketName: 'cloud-mockmentor-bucket'
+      BucketName: cloud-mockmentor-bucket
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
@@ -16,47 +16,47 @@ Resources:
               - "*"
 
   AnswerRequestQueue:
-    Type: 'AWS::SQS::Queue'
+    Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'answer-request-queue'
+      QueueName: answer-request-queue
 
   AnswerResponseQueue:
-    Type: 'AWS::SQS::Queue'
+    Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'answer-response-queue'
+      QueueName: answer-response-queue
 
   EmotionRequestQueue:
-    Type: 'AWS::SQS::Queue'
+    Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'emotion-request-queue'
+      QueueName: emotion-request-queue
 
   EmotionResponseQueue:
-    Type: 'AWS::SQS::Queue'
+    Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'emotion-response-queue'
+      QueueName: emotion-response-queue
 
   FeedbackRequestQueue:
-    Type: 'AWS::SQS::Queue'
+    Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'feedback-request-queue'
+      QueueName: feedback-request-queue
 
   FeedbackResponseQueue:
-    Type: 'AWS::SQS::Queue'
+    Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'feedback-response-queue'
+      QueueName: feedback-response-queue
 
   VideoConversionRequestQueue:
-    Type: 'AWS::SQS::Queue'
+    Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'video-conversion-request-queue'
+      QueueName: video-conversion-request-queue
 
   VideoConversionResponseQueue:
-    Type: 'AWS::SQS::Queue'
+    Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'video-conversion-response-queue'
+      QueueName: video-conversion-response-queue
 
   MockmentorVPC:
-    Type: 'AWS::EC2::VPC'
+    Type: AWS::EC2::VPC
     Properties:
       CidrBlock: '10.0.0.0/16'
       EnableDnsSupport: true
@@ -66,20 +66,20 @@ Resources:
           Value: mockmentor-vpc
 
   MockmentorInternetGateway:
-    Type: 'AWS::EC2::InternetGateway'
+    Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
           Value: mockmentor-internet-gateway
 
   VPCGatewayAttachment:
-    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref MockmentorVPC
       InternetGatewayId: !Ref MockmentorInternetGateway
 
   PublicSubnet1:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref MockmentorVPC
       CidrBlock: '10.0.1.0/24'
@@ -89,7 +89,7 @@ Resources:
           Value: mockmentor-public-subnet-1a
 
   PublicSubnet2:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref MockmentorVPC
       CidrBlock: '10.0.2.0/24'
@@ -99,7 +99,7 @@ Resources:
           Value: mockmentor-public-subnet-1b
 
   PrivateSubnet1c:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref MockmentorVPC
       CidrBlock: '10.0.3.0/24'
@@ -109,7 +109,7 @@ Resources:
           Value: mockmentor-private-subnet-1c
 
   PrivateSubnet1d:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref MockmentorVPC
       CidrBlock: '10.0.4.0/24'
@@ -119,7 +119,7 @@ Resources:
           Value: mockmentor-private-subnet-1d
 
   PrivateSubnetNgw1e:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref MockmentorVPC
       CidrBlock: '10.0.5.0/24'
@@ -129,7 +129,7 @@ Resources:
           Value: mockmentor-private-subnet-ngw-1e
 
   PrivateSubnetNgw1f:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref MockmentorVPC
       CidrBlock: '10.0.6.0/24'
@@ -139,7 +139,7 @@ Resources:
           Value: mockmentor-private-subnet-ngw-1f
 
   NatElasticIP:
-    Type: 'AWS::EC2::EIP'
+    Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
       Tags:
@@ -147,7 +147,7 @@ Resources:
           Value: NatElasticIP
 
   MockmentorNatGateway:
-    Type: 'AWS::EC2::NatGateway'
+    Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NatElasticIP.AllocationId
       SubnetId: !Ref PublicSubnet1
@@ -156,7 +156,7 @@ Resources:
           Value: mockmentor-nat-gateway
 
   PublicRouteTable:
-    Type: 'AWS::EC2::RouteTable'
+    Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref MockmentorVPC
       Tags:
@@ -164,7 +164,7 @@ Resources:
           Value: mockmentor-route-table-public
 
   PublicRoute:
-    Type: 'AWS::EC2::Route'
+    Type: AWS::EC2::Route
     DependsOn: VPCGatewayAttachment
     Properties:
       RouteTableId: !Ref PublicRouteTable
@@ -172,19 +172,19 @@ Resources:
       GatewayId: !Ref MockmentorInternetGateway
 
   PublicSubnetRouteTableAssociation1:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnet1
       RouteTableId: !Ref PublicRouteTable
 
   PublicSubnetRouteTableAssociation2:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
 
   PrivateRouteTable:
-    Type: 'AWS::EC2::RouteTable'
+    Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref MockmentorVPC
       Tags:
@@ -192,19 +192,19 @@ Resources:
           Value: mockmentor-route-table-private
 
   PrivateSubnetRouteTableAssociation1c:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet1c
       RouteTableId: !Ref PrivateRouteTable
 
   PrivateSubnetRouteTableAssociation1d:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet1d
       RouteTableId: !Ref PrivateRouteTable
 
   PrivateRouteTableNgw:
-    Type: 'AWS::EC2::RouteTable'
+    Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref MockmentorVPC
       Tags:
@@ -212,58 +212,58 @@ Resources:
           Value: mockmentor-route-table-private-ngw
 
   PrivateRouteNgw:
-    Type: 'AWS::EC2::Route'
+    Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTableNgw
       DestinationCidrBlock: '0.0.0.0/0'
       NatGatewayId: !Ref MockmentorNatGateway
 
   PrivateSubnetRouteTableAssociationNgw1e:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnetNgw1e
       RouteTableId: !Ref PrivateRouteTableNgw
 
   PrivateSubnetRouteTableAssociationNgw1f:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnetNgw1f
       RouteTableId: !Ref PrivateRouteTableNgw
   
   MockmentorSubnetGroup:
-    Type: 'AWS::RDS::DBSubnetGroup'
+    Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: 'mockmentor-subnet-groups'
+      DBSubnetGroupDescription: 'subnet groups for rds'
       SubnetIds:
         - !Ref PrivateSubnet1c
         - !Ref PrivateSubnet1d
-      DBSubnetGroupName: 'mockmentor-subnet-groups'
+      DBSubnetGroupName: mockmentor-subnet-groups
       Tags:
         - Key: Name
           Value: mockmentor-subnet-groups
 
   MockmentorSecurityGroupPublic:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: 'Public security group'
+      GroupDescription: 'Security group'
       VpcId: !Ref MockmentorVPC
       SecurityGroupIngress:
         - IpProtocol: -1
-          CidrIp: '0.0.0.0/0'
+          CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
           Value: mockmentor-security-group-public
 
   MockmentorRDSInstance:
-    Type: 'AWS::RDS::DBInstance'
+    Type: AWS::RDS::DBInstance
     Properties:
-      DBInstanceIdentifier: 'mockmentordb'
-      DBName: 'mockmentordb'
-      Engine: 'mysql'
-      DBInstanceClass: 'db.t3.micro'
-      MasterUsername: 'admin'
-      MasterUserPassword: 'Admin12345'
-      AllocatedStorage: '20'
+      DBInstanceIdentifier: mockmentordb
+      DBName: mockmentordb
+      Engine: mysql
+      DBInstanceClass: db.t3.micro
+      MasterUsername: admin
+      MasterUserPassword: Admin12345
+      AllocatedStorage: 20
       DBSubnetGroupName: !Ref MockmentorSubnetGroup
       VPCSecurityGroups:
         - !Ref MockmentorSecurityGroupPublic
@@ -273,9 +273,9 @@ Resources:
           Value: mockmentor-rds-instance
 
   FrontendTargetGroup:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: 'frontend-target-group'
+      Name: frontend-target-group
       Protocol: 'HTTP'
       Port: 80
       VpcId: !Ref MockmentorVPC
@@ -289,9 +289,9 @@ Resources:
       UnhealthyThresholdCount: 2
 
   BackendTargetGroup:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: 'backend-target-group'
+      Name: backend-target-group
       Protocol: 'HTTP'
       Port: 8080
       VpcId: !Ref MockmentorVPC
@@ -305,11 +305,11 @@ Resources:
       UnhealthyThresholdCount: 2
 
   ApplicationLoadBalancer:
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn: VPCGatewayAttachment
     Properties:
-      Name: 'mockmentor-load-balancer'
-      Scheme: 'internet-facing'
+      Name: mockmentor-load-balancer
+      Scheme: internet-facing
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
@@ -338,30 +338,30 @@ Resources:
       Protocol: HTTP
   
   MockmentorECSCluster:
-    Type: 'AWS::ECS::Cluster'
+    Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: 'mockmentor-ecs-cluster'
+      ClusterName: mockmentor-ecs-cluster
   
   FrontendTaskDefinition:
-    Type: 'AWS::ECS::TaskDefinition'
+    Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: 'frontend-task-definition'
+      Family: frontend-task-definition
       Cpu: '1024'
       Memory: '2048'
-      NetworkMode: 'awsvpc'
+      NetworkMode: awsvpc
       RequiresCompatibilities:
-        - 'FARGATE'
-      ExecutionRoleArn: 'arn:aws:iam::655419273073:role/LabRole'
-      TaskRoleArn: 'arn:aws:iam::655419273073:role/LabRole'
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::655419273073:role/LabRole
+      TaskRoleArn: arn:aws:iam::655419273073:role/LabRole
       ContainerDefinitions:
-        - Name: 'frontend-container'
-          Image: 'kevalgandevia/mockmentor-frontend:latest'
+        - Name: frontend-container
+          Image: kevalgandevia/mockmentor-frontend:latest
           PortMappings:
             - ContainerPort: 80
-              Protocol: 'tcp'
+              Protocol: tcp
   
   FrontendService:
-    Type: 'AWS::ECS::Service'
+    Type: AWS::ECS::Service
     DependsOn:
       - FrontendListener
       - MockmentorRDSInstance
@@ -369,7 +369,7 @@ Resources:
       Cluster: !Ref MockmentorECSCluster
       DesiredCount: 1
       LaunchType: 'FARGATE'
-      ServiceName: 'frontend-service'
+      ServiceName: frontend-service
       TaskDefinition: !Ref FrontendTaskDefinition
       NetworkConfiguration:
         AwsvpcConfiguration:
@@ -378,32 +378,32 @@ Resources:
           Subnets:
             - !Ref PublicSubnet1
             - !Ref PublicSubnet2
-          AssignPublicIp: 'ENABLED'
+          AssignPublicIp: ENABLED
       LoadBalancers:
-        - ContainerName: 'frontend-container'
+        - ContainerName: frontend-container
           ContainerPort: 80
           TargetGroupArn: !Ref FrontendTargetGroup
   
   BackendTaskDefinition:
-    Type: 'AWS::ECS::TaskDefinition'
+    Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: 'backend-rest-api-task-definition'
+      Family: backend-rest-api-task-definition
       Cpu: '1024'
       Memory: '2048'
-      NetworkMode: 'awsvpc'
+      NetworkMode: awsvpc
       RequiresCompatibilities:
-        - 'FARGATE'
-      ExecutionRoleArn: 'arn:aws:iam::655419273073:role/LabRole'
-      TaskRoleArn: 'arn:aws:iam::655419273073:role/LabRole'
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::655419273073:role/LabRole
+      TaskRoleArn: arn:aws:iam::655419273073:role/LabRole
       ContainerDefinitions:
-        - Name: 'backend-restapi-container'
-          Image: 'kevalgandevia/mockmentor-backend-restapi:latest'
+        - Name: backend-restapi-container
+          Image: kevalgandevia/mockmentor-backend-restapi:latest
           PortMappings:
             - ContainerPort: 8080
-              Protocol: 'tcp'
+              Protocol: tc
   
   BackendRestApiService:
-    Type: 'AWS::ECS::Service'
+    Type: AWS::ECS::Service
     DependsOn:
       - BackendListener
       - MockmentorRDSInstance
@@ -411,7 +411,7 @@ Resources:
       Cluster: !Ref MockmentorECSCluster
       DesiredCount: 1
       LaunchType: 'FARGATE'
-      ServiceName: 'backend-restapi-service'
+      ServiceName: backend-restapi-service
       TaskDefinition: !Ref BackendTaskDefinition
       NetworkConfiguration:
         AwsvpcConfiguration:
@@ -422,38 +422,38 @@ Resources:
             - !Ref PublicSubnet1
             - !Ref PublicSubnet2
       LoadBalancers:
-        - ContainerName: 'backend-restapi-container'
+        - ContainerName: backend-restapi-container
           ContainerPort: 8080
           TargetGroupArn: !Ref BackendTargetGroup
 
 
   BackendConsumerTaskDefinition:
-    Type: 'AWS::ECS::TaskDefinition'
+    Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: 'backend-consumer-task-definition'
+      Family: backend-consumer-task-definition
       Cpu: '2048'
       Memory: '4096'
-      NetworkMode: 'awsvpc'
+      NetworkMode: awsvpc
       RequiresCompatibilities:
-        - 'FARGATE'
-      ExecutionRoleArn: 'arn:aws:iam::655419273073:role/LabRole'
-      TaskRoleArn: 'arn:aws:iam::655419273073:role/LabRole'
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::655419273073:role/LabRole
+      TaskRoleArn: arn:aws:iam::655419273073:role/LabRole
       ContainerDefinitions:
-        - Name: 'backend-consumer-container'
-          Image: 'kevalgandevia/mockmentor-backend-consumer:latest'
+        - Name: backend-consumer-container
+          Image: kevalgandevia/mockmentor-backend-consumer:latest
           PortMappings:
             - ContainerPort: 80
-              Protocol: 'tcp'
+              Protocol: tcp
 
   BackendConsumerService:
-    Type: 'AWS::ECS::Service'
+    Type: AWS::ECS::Service
     DependsOn:
       - MockmentorRDSInstance
     Properties:
       Cluster: !Ref MockmentorECSCluster
       DesiredCount: 1
       LaunchType: 'FARGATE'
-      ServiceName: 'backend-consumer-service'
+      ServiceName: backend-consumer-service
       TaskDefinition: !Ref BackendConsumerTaskDefinition
       NetworkConfiguration:
         AwsvpcConfiguration:
@@ -464,15 +464,15 @@ Resources:
             - !Ref PrivateSubnetNgw1f
 
   FeedbackEC2Instance:
-    Type: 'AWS::EC2::Instance'
+    Type: AWS::EC2::Instance
     DependsOn:
       - FeedbackRequestQueue
       - FeedbackResponseQueue
     Properties:
-      InstanceType: 't2.micro'
-      ImageId: 'ami-055744c75048d8296'
+      InstanceType: t2.micro
+      ImageId: ami-055744c75048d8296
       SubnetId: !Ref PrivateSubnetNgw1e
-      KeyName: 'cloud-mock-mentor-key-pair'
+      KeyName: cloud-mock-mentor-key-pair
       SecurityGroupIds:
         - !Ref MockmentorSecurityGroupPublic
       UserData:
@@ -490,15 +490,15 @@ Resources:
           Value: feedback-ec2-instance
 
   RecognitionEC2Instance:
-    Type: 'AWS::EC2::Instance'
+    Type: AWS::EC2::Instance
     DependsOn:
       - EmotionRequestQueue
       - EmotionResponseQueue
     Properties:
-      InstanceType: 't2.small'
-      ImageId: 'ami-055744c75048d8296'
+      InstanceType: t2.small
+      ImageId: ami-055744c75048d8296
       SubnetId: !Ref PrivateSubnetNgw1e
-      KeyName: 'cloud-mock-mentor-key-pair'
+      KeyName: cloud-mock-mentor-key-pair
       SecurityGroupIds:
         - !Ref MockmentorSecurityGroupPublic
       UserData:
@@ -516,15 +516,15 @@ Resources:
           Value: recognition-ec2-instance
   
   TranscribeEC2Instance:
-    Type: 'AWS::EC2::Instance'
+    Type: AWS::EC2::Instance
     DependsOn:
       - AnswerRequestQueue
       - AnswerResponseQueue
     Properties:
-      InstanceType: 't2.micro'
-      ImageId: 'ami-055744c75048d8296'
+      InstanceType: t2.micro
+      ImageId: ami-055744c75048d8296
       SubnetId: !Ref PrivateSubnetNgw1e
-      KeyName: 'cloud-mock-mentor-key-pair'
+      KeyName: cloud-mock-mentor-key-pair
       SecurityGroupIds:
         - !Ref MockmentorSecurityGroupPublic
       UserData:
@@ -542,15 +542,15 @@ Resources:
           Value: transcribe-ec2-instance
   
   VideoConversionEC2Instance:
-    Type: 'AWS::EC2::Instance'
+    Type: AWS::EC2::Instance
     DependsOn:
       - VideoConversionRequestQueue
       - VideoConversionResponseQueue
     Properties:
-      InstanceType: 't2.small'
-      ImageId: 'ami-055744c75048d8296'
+      InstanceType: t2.small
+      ImageId: ami-055744c75048d8296
       SubnetId: !Ref PrivateSubnetNgw1e
-      KeyName: 'cloud-mock-mentor-key-pair'
+      KeyName: cloud-mock-mentor-key-pair
       SecurityGroupIds:
         - !Ref MockmentorSecurityGroupPublic
       UserData:
