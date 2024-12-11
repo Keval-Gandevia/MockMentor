@@ -249,17 +249,69 @@ Resources:
         - Key: Name
           Value: mockmentor-subnet-groups
 
-  MockmentorSecurityGroupPublic:
+  FrontendSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: 'Security group'
+      GroupDescription: "Frontend security group"
       VpcId: !Ref MockmentorVPC
       SecurityGroupIngress:
-        - IpProtocol: -1
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
           CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
-          Value: mockmentor-security-group-public
+          Value: frontend-security-group
+
+  BackendRestApiSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Backend REST API security group"
+      VpcId: !Ref MockmentorVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: backend-rest-api-security-group
+
+  BackendConsumerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Backend consumer security group"
+      VpcId: !Ref MockmentorVPC
+      Tags:
+        - Key: Name
+          Value: backend-consumer-security-group
+
+  ProcessingSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Processing security group"
+      VpcId: !Ref MockmentorVPC
+      Tags:
+        - Key: Name
+          Value: processing-security-group
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "RDS security group"
+      VpcId: !Ref MockmentorVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !GetAtt BackendRestApiSecurityGroup.GroupId
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !GetAtt BackendConsumerSecurityGroup.GroupId
+      Tags:
+        - Key: Name
+          Value: rds-security-group
 
   MockmentorRDSInstance:
     Type: AWS::RDS::DBInstance
@@ -273,7 +325,7 @@ Resources:
       AllocatedStorage: 20
       DBSubnetGroupName: !Ref MockmentorSubnetGroup
       VPCSecurityGroups:
-        - !Ref MockmentorSecurityGroupPublic
+        - !Ref RDSSecurityGroup
       PubliclyAccessible: false
       Tags:
         - Key: Name
@@ -320,8 +372,11 @@ Resources:
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
+        - !Ref PrivateSubnetNgw1e
+        - !Ref PrivateSubnetNgw1f
       SecurityGroups:
-        - !Ref MockmentorSecurityGroupPublic
+        - !Ref FrontendSecurityGroup
+        - !Ref BackendRestApiSecurityGroup
       Type: application
 
   FrontendListener:
@@ -381,11 +436,10 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
-            - !Ref MockmentorSecurityGroupPublic
+            - !Ref FrontendSecurityGroup
           Subnets:
-            - !Ref PublicSubnet1
-            - !Ref PublicSubnet2
-          AssignPublicIp: ENABLED
+            - !Ref PrivateSubnetNgw1e
+            - !Ref PrivateSubnetNgw1f
       LoadBalancers:
         - ContainerName: frontend-container
           ContainerPort: 80
@@ -422,12 +476,11 @@ Resources:
       TaskDefinition: !Ref BackendTaskDefinition
       NetworkConfiguration:
         AwsvpcConfiguration:
-          AssignPublicIp: 'ENABLED'
           SecurityGroups:
-            - !Ref MockmentorSecurityGroupPublic
+            - !Ref BackendRestApiSecurityGroup
           Subnets:
-            - !Ref PublicSubnet1
-            - !Ref PublicSubnet2
+            - !Ref PrivateSubnetNgw1e
+            - !Ref PrivateSubnetNgw1f
       LoadBalancers:
         - ContainerName: backend-restapi-container
           ContainerPort: 8080
@@ -464,7 +517,7 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
-            - !Ref MockmentorSecurityGroupPublic
+            - !Ref BackendConsumerSecurityGroup
           Subnets:
             - !Ref PrivateSubnetNgw1e
             - !Ref PrivateSubnetNgw1f
@@ -500,7 +553,7 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
-            - !Ref MockmentorSecurityGroupPublic
+            - !Ref ProcessingSecurityGroup
           Subnets:
             - !Ref PrivateSubnetNgw1e
             - !Ref PrivateSubnetNgw1f
@@ -536,7 +589,7 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
-            - !Ref MockmentorSecurityGroupPublic
+            - !Ref ProcessingSecurityGroup
           Subnets:
             - !Ref PrivateSubnetNgw1e
             - !Ref PrivateSubnetNgw1f
@@ -572,7 +625,7 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
-            - !Ref MockmentorSecurityGroupPublic
+            - !Ref ProcessingSecurityGroup
           Subnets:
             - !Ref PrivateSubnetNgw1e
             - !Ref PrivateSubnetNgw1f
@@ -608,111 +661,7 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
-            - !Ref MockmentorSecurityGroupPublic
+            - !Ref ProcessingSecurityGroup
           Subnets:
             - !Ref PrivateSubnetNgw1e
             - !Ref PrivateSubnetNgw1f
-
-  # FeedbackEC2Instance:
-  #   Type: AWS::EC2::Instance
-  #   DependsOn:
-  #     - FeedbackRequestQueue
-  #     - FeedbackResponseQueue
-  #   Properties:
-  #     InstanceType: t2.micro
-  #     ImageId: ami-055744c75048d8296
-  #     SubnetId: !Ref PrivateSubnetNgw1e
-  #     KeyName: cloud-mock-mentor-key-pair
-  #     SecurityGroupIds:
-  #       - !Ref MockmentorSecurityGroupPublic
-  #     UserData:
-  #       Fn::Base64: !Sub |
-  #         #!/bin/bash
-  #         apt-get update -y
-  #         apt-get install -y docker.io
-  #         systemctl start docker
-  #         systemctl enable docker
-  #         usermod -aG docker ubuntu
-  #         docker pull kevalgandevia/mockmentor-feedback:latest
-  #         docker run -d -p 6001:80 kevalgandevia/mockmentor-feedback
-  #     Tags:
-  #       - Key: Name
-  #         Value: feedback-ec2-instance
-
-  # RecognitionEC2Instance:
-  #   Type: AWS::EC2::Instance
-  #   DependsOn:
-  #     - EmotionRequestQueue
-  #     - EmotionResponseQueue
-  #   Properties:
-  #     InstanceType: t2.small
-  #     ImageId: ami-055744c75048d8296
-  #     SubnetId: !Ref PrivateSubnetNgw1e
-  #     KeyName: cloud-mock-mentor-key-pair
-  #     SecurityGroupIds:
-  #       - !Ref MockmentorSecurityGroupPublic
-  #     UserData:
-  #       Fn::Base64: !Sub |
-  #         #!/bin/bash
-  #         apt-get update -y
-  #         apt-get install -y docker.io
-  #         systemctl start docker
-  #         systemctl enable docker
-  #         usermod -aG docker ubuntu
-  #         docker pull kevalgandevia/mockmentor-recognition:latest
-  #         docker run -d -p 6002:80 kevalgandevia/mockmentor-recognition
-  #     Tags:
-  #       - Key: Name
-  #         Value: recognition-ec2-instance
-  
-  # TranscribeEC2Instance:
-  #   Type: AWS::EC2::Instance
-  #   DependsOn:
-  #     - AnswerRequestQueue
-  #     - AnswerResponseQueue
-  #   Properties:
-  #     InstanceType: t2.micro
-  #     ImageId: ami-055744c75048d8296
-  #     SubnetId: !Ref PrivateSubnetNgw1e
-  #     KeyName: cloud-mock-mentor-key-pair
-  #     SecurityGroupIds:
-  #       - !Ref MockmentorSecurityGroupPublic
-  #     UserData:
-  #       Fn::Base64: !Sub |
-  #         #!/bin/bash
-  #         apt-get update -y
-  #         apt-get install -y docker.io
-  #         systemctl start docker
-  #         systemctl enable docker
-  #         usermod -aG docker ubuntu
-  #         docker pull kevalgandevia/mockmentor-transcribe:latest
-  #         docker run -d -p 6003:80 kevalgandevia/mockmentor-transcribe
-  #     Tags:
-  #       - Key: Name
-  #         Value: transcribe-ec2-instance
-  
-  # VideoConversionEC2Instance:
-  #   Type: AWS::EC2::Instance
-  #   DependsOn:
-  #     - VideoConversionRequestQueue
-  #     - VideoConversionResponseQueue
-  #   Properties:
-  #     InstanceType: t2.small
-  #     ImageId: ami-055744c75048d8296
-  #     SubnetId: !Ref PrivateSubnetNgw1e
-  #     KeyName: cloud-mock-mentor-key-pair
-  #     SecurityGroupIds:
-  #       - !Ref MockmentorSecurityGroupPublic
-  #     UserData:
-  #       Fn::Base64: !Sub |
-  #         #!/bin/bash
-  #         apt-get update -y
-  #         apt-get install -y docker.io
-  #         systemctl start docker
-  #         systemctl enable docker
-  #         usermod -aG docker ubuntu
-  #         docker pull kevalgandevia/mockmentor-video-conversion:latest
-  #         docker run -d -p 6004:80 kevalgandevia/mockmentor-video-conversion
-  #     Tags:
-  #       - Key: Name
-  #         Value: video-conversion-ec2-instance
