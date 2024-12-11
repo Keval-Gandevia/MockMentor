@@ -14,6 +14,13 @@ Resources:
               - DELETE
             AllowedOrigins:
               - "*"
+      LifecycleConfiguration:
+        Rules:
+          - Id: "TransitionToStandardIA"
+            Status: "Enabled"
+            Transitions:
+              - StorageClass: "STANDARD_IA"
+                TransitionInDays: 30
 
   AnswerRequestQueue:
     Type: AWS::SQS::Queue
@@ -351,8 +358,8 @@ Resources:
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      ExecutionRoleArn: arn:aws:iam::655419273073:role/LabRole
-      TaskRoleArn: arn:aws:iam::655419273073:role/LabRole
+      ExecutionRoleArn: arn:aws:iam::887012994601:role/LabRole
+      TaskRoleArn: arn:aws:iam::887012994601:role/LabRole
       ContainerDefinitions:
         - Name: frontend-container
           Image: kevalgandevia/mockmentor-frontend:latest
@@ -393,14 +400,14 @@ Resources:
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      ExecutionRoleArn: arn:aws:iam::655419273073:role/LabRole
-      TaskRoleArn: arn:aws:iam::655419273073:role/LabRole
+      ExecutionRoleArn: arn:aws:iam::887012994601:role/LabRole
+      TaskRoleArn: arn:aws:iam::887012994601:role/LabRole
       ContainerDefinitions:
         - Name: backend-restapi-container
           Image: kevalgandevia/mockmentor-backend-restapi:latest
           PortMappings:
             - ContainerPort: 8080
-              Protocol: tc
+              Protocol: tcp
   
   BackendRestApiService:
     Type: AWS::ECS::Service
@@ -426,7 +433,6 @@ Resources:
           ContainerPort: 8080
           TargetGroupArn: !Ref BackendTargetGroup
 
-
   BackendConsumerTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -436,8 +442,8 @@ Resources:
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      ExecutionRoleArn: arn:aws:iam::655419273073:role/LabRole
-      TaskRoleArn: arn:aws:iam::655419273073:role/LabRole
+      ExecutionRoleArn: arn:aws:iam::887012994601:role/LabRole
+      TaskRoleArn: arn:aws:iam::887012994601:role/LabRole
       ContainerDefinitions:
         - Name: backend-consumer-container
           Image: kevalgandevia/mockmentor-backend-consumer:latest
@@ -463,106 +469,250 @@ Resources:
             - !Ref PrivateSubnetNgw1e
             - !Ref PrivateSubnetNgw1f
 
-  FeedbackEC2Instance:
-    Type: AWS::EC2::Instance
-    DependsOn:
-      - FeedbackRequestQueue
-      - FeedbackResponseQueue
+  FeedbackTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
     Properties:
-      InstanceType: t2.micro
-      ImageId: ami-055744c75048d8296
-      SubnetId: !Ref PrivateSubnetNgw1e
-      KeyName: cloud-mock-mentor-key-pair
-      SecurityGroupIds:
-        - !Ref MockmentorSecurityGroupPublic
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          apt-get update -y
-          apt-get install -y docker.io
-          systemctl start docker
-          systemctl enable docker
-          usermod -aG docker ubuntu
-          docker pull kevalgandevia/mockmentor-feedback:latest
-          docker run -d -p 6001:80 kevalgandevia/mockmentor-feedback
-      Tags:
-        - Key: Name
-          Value: feedback-ec2-instance
+      Family: feedback-task-definition
+      Cpu: '2048'
+      Memory: '4096'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::887012994601:role/LabRole
+      TaskRoleArn: arn:aws:iam::887012994601:role/LabRole
+      ContainerDefinitions:
+        - Name: feedback-container
+          Image: kevalgandevia/mockmentor-feedback:latest
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
 
-  RecognitionEC2Instance:
-    Type: AWS::EC2::Instance
+  FeedbackService:
+    Type: AWS::ECS::Service
     DependsOn:
-      - EmotionRequestQueue
-      - EmotionResponseQueue
+      - MockmentorRDSInstance
     Properties:
-      InstanceType: t2.small
-      ImageId: ami-055744c75048d8296
-      SubnetId: !Ref PrivateSubnetNgw1e
-      KeyName: cloud-mock-mentor-key-pair
-      SecurityGroupIds:
-        - !Ref MockmentorSecurityGroupPublic
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          apt-get update -y
-          apt-get install -y docker.io
-          systemctl start docker
-          systemctl enable docker
-          usermod -aG docker ubuntu
-          docker pull kevalgandevia/mockmentor-recognition:latest
-          docker run -d -p 6002:80 kevalgandevia/mockmentor-recognition
-      Tags:
-        - Key: Name
-          Value: recognition-ec2-instance
+      Cluster: !Ref MockmentorECSCluster
+      DesiredCount: 1
+      LaunchType: 'FARGATE'
+      ServiceName: feedback-service
+      TaskDefinition: !Ref FeedbackTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref MockmentorSecurityGroupPublic
+          Subnets:
+            - !Ref PrivateSubnetNgw1e
+            - !Ref PrivateSubnetNgw1f
+
+  RecognitionTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: recognition-task-definition
+      Cpu: '2048'
+      Memory: '4096'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::887012994601:role/LabRole
+      TaskRoleArn: arn:aws:iam::887012994601:role/LabRole
+      ContainerDefinitions:
+        - Name: recognition-container
+          Image: kevalgandevia/mockmentor-recognition:latest
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+
+  RecognitionService:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - MockmentorRDSInstance
+    Properties:
+      Cluster: !Ref MockmentorECSCluster
+      DesiredCount: 1
+      LaunchType: 'FARGATE'
+      ServiceName: recognition-service
+      TaskDefinition: !Ref RecognitionTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref MockmentorSecurityGroupPublic
+          Subnets:
+            - !Ref PrivateSubnetNgw1e
+            - !Ref PrivateSubnetNgw1f
+
+  TranscribeTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: transcribe-task-definition
+      Cpu: '2048'
+      Memory: '4096'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::887012994601:role/LabRole
+      TaskRoleArn: arn:aws:iam::887012994601:role/LabRole
+      ContainerDefinitions:
+        - Name: transcribe-container
+          Image: kevalgandevia/mockmentor-transcribe:latest
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+
+  TranscribeService:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - MockmentorRDSInstance
+    Properties:
+      Cluster: !Ref MockmentorECSCluster
+      DesiredCount: 1
+      LaunchType: 'FARGATE'
+      ServiceName: transcribe-service
+      TaskDefinition: !Ref TranscribeTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref MockmentorSecurityGroupPublic
+          Subnets:
+            - !Ref PrivateSubnetNgw1e
+            - !Ref PrivateSubnetNgw1f
   
-  TranscribeEC2Instance:
-    Type: AWS::EC2::Instance
-    DependsOn:
-      - AnswerRequestQueue
-      - AnswerResponseQueue
+  VideoConversionTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
     Properties:
-      InstanceType: t2.micro
-      ImageId: ami-055744c75048d8296
-      SubnetId: !Ref PrivateSubnetNgw1e
-      KeyName: cloud-mock-mentor-key-pair
-      SecurityGroupIds:
-        - !Ref MockmentorSecurityGroupPublic
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          apt-get update -y
-          apt-get install -y docker.io
-          systemctl start docker
-          systemctl enable docker
-          usermod -aG docker ubuntu
-          docker pull kevalgandevia/mockmentor-transcribe:latest
-          docker run -d -p 6003:80 kevalgandevia/mockmentor-transcribe
-      Tags:
-        - Key: Name
-          Value: transcribe-ec2-instance
+      Family: video-conversion-task-definition
+      Cpu: '2048'
+      Memory: '4096'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::887012994601:role/LabRole
+      TaskRoleArn: arn:aws:iam::887012994601:role/LabRole
+      ContainerDefinitions:
+        - Name: video-conversion-container
+          Image: kevalgandevia/mockmentor-video-conversion:latest
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+
+  VideoConversionService:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - MockmentorRDSInstance
+    Properties:
+      Cluster: !Ref MockmentorECSCluster
+      DesiredCount: 1
+      LaunchType: 'FARGATE'
+      ServiceName: video-conversion-service
+      TaskDefinition: !Ref VideoConversionTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref MockmentorSecurityGroupPublic
+          Subnets:
+            - !Ref PrivateSubnetNgw1e
+            - !Ref PrivateSubnetNgw1f
+
+  # FeedbackEC2Instance:
+  #   Type: AWS::EC2::Instance
+  #   DependsOn:
+  #     - FeedbackRequestQueue
+  #     - FeedbackResponseQueue
+  #   Properties:
+  #     InstanceType: t2.micro
+  #     ImageId: ami-055744c75048d8296
+  #     SubnetId: !Ref PrivateSubnetNgw1e
+  #     KeyName: cloud-mock-mentor-key-pair
+  #     SecurityGroupIds:
+  #       - !Ref MockmentorSecurityGroupPublic
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash
+  #         apt-get update -y
+  #         apt-get install -y docker.io
+  #         systemctl start docker
+  #         systemctl enable docker
+  #         usermod -aG docker ubuntu
+  #         docker pull kevalgandevia/mockmentor-feedback:latest
+  #         docker run -d -p 6001:80 kevalgandevia/mockmentor-feedback
+  #     Tags:
+  #       - Key: Name
+  #         Value: feedback-ec2-instance
+
+  # RecognitionEC2Instance:
+  #   Type: AWS::EC2::Instance
+  #   DependsOn:
+  #     - EmotionRequestQueue
+  #     - EmotionResponseQueue
+  #   Properties:
+  #     InstanceType: t2.small
+  #     ImageId: ami-055744c75048d8296
+  #     SubnetId: !Ref PrivateSubnetNgw1e
+  #     KeyName: cloud-mock-mentor-key-pair
+  #     SecurityGroupIds:
+  #       - !Ref MockmentorSecurityGroupPublic
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash
+  #         apt-get update -y
+  #         apt-get install -y docker.io
+  #         systemctl start docker
+  #         systemctl enable docker
+  #         usermod -aG docker ubuntu
+  #         docker pull kevalgandevia/mockmentor-recognition:latest
+  #         docker run -d -p 6002:80 kevalgandevia/mockmentor-recognition
+  #     Tags:
+  #       - Key: Name
+  #         Value: recognition-ec2-instance
   
-  VideoConversionEC2Instance:
-    Type: AWS::EC2::Instance
-    DependsOn:
-      - VideoConversionRequestQueue
-      - VideoConversionResponseQueue
-    Properties:
-      InstanceType: t2.small
-      ImageId: ami-055744c75048d8296
-      SubnetId: !Ref PrivateSubnetNgw1e
-      KeyName: cloud-mock-mentor-key-pair
-      SecurityGroupIds:
-        - !Ref MockmentorSecurityGroupPublic
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          apt-get update -y
-          apt-get install -y docker.io
-          systemctl start docker
-          systemctl enable docker
-          usermod -aG docker ubuntu
-          docker pull kevalgandevia/mockmentor-video-conversion:latest
-          docker run -d -p 6004:80 kevalgandevia/mockmentor-video-conversion
-      Tags:
-        - Key: Name
-          Value: video-conversion-ec2-instance
+  # TranscribeEC2Instance:
+  #   Type: AWS::EC2::Instance
+  #   DependsOn:
+  #     - AnswerRequestQueue
+  #     - AnswerResponseQueue
+  #   Properties:
+  #     InstanceType: t2.micro
+  #     ImageId: ami-055744c75048d8296
+  #     SubnetId: !Ref PrivateSubnetNgw1e
+  #     KeyName: cloud-mock-mentor-key-pair
+  #     SecurityGroupIds:
+  #       - !Ref MockmentorSecurityGroupPublic
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash
+  #         apt-get update -y
+  #         apt-get install -y docker.io
+  #         systemctl start docker
+  #         systemctl enable docker
+  #         usermod -aG docker ubuntu
+  #         docker pull kevalgandevia/mockmentor-transcribe:latest
+  #         docker run -d -p 6003:80 kevalgandevia/mockmentor-transcribe
+  #     Tags:
+  #       - Key: Name
+  #         Value: transcribe-ec2-instance
+  
+  # VideoConversionEC2Instance:
+  #   Type: AWS::EC2::Instance
+  #   DependsOn:
+  #     - VideoConversionRequestQueue
+  #     - VideoConversionResponseQueue
+  #   Properties:
+  #     InstanceType: t2.small
+  #     ImageId: ami-055744c75048d8296
+  #     SubnetId: !Ref PrivateSubnetNgw1e
+  #     KeyName: cloud-mock-mentor-key-pair
+  #     SecurityGroupIds:
+  #       - !Ref MockmentorSecurityGroupPublic
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash
+  #         apt-get update -y
+  #         apt-get install -y docker.io
+  #         systemctl start docker
+  #         systemctl enable docker
+  #         usermod -aG docker ubuntu
+  #         docker pull kevalgandevia/mockmentor-video-conversion:latest
+  #         docker run -d -p 6004:80 kevalgandevia/mockmentor-video-conversion
+  #     Tags:
+  #       - Key: Name
+  #         Value: video-conversion-ec2-instance
